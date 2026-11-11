@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perancangan & Wiring — Sistem Monitoring Fisiologis ESP32</title>
+<style>
+  :root{
+    --ink:#0f172a; --ink-2:#334155; --ink-3:#64748b;
+    --line:#e2e8f0; --line-2:#cbd5e1;
+    --soft:#f8fafc; --blue:#3b82f6; --amber:#f59e0b; --red:#ef4444; --orange:#ea580c;
+    --green:#16a34a; --teal:#0d9488;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{
+    margin:0; padding:48px 32px 80px; background:#eef2f6; color:var(--ink);
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    font-size:15px; line-height:1.65;
+  }
+  .page{
+    max-width:1040px; margin:0 auto; background:#fff; padding:56px 64px 72px;
+    border-radius:6px; box-shadow:0 1px 2px rgba(15,23,42,.06),0 12px 32px rgba(15,23,42,.08);
+  }
+  header.doc{border-bottom:3px solid var(--ink); padding-bottom:22px; margin-bottom:34px;}
+  .kicker{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); font-weight:700;}
+  h1{font-size:28px; line-height:1.25; margin:10px 0 14px; letter-spacing:-.02em;}
+  .meta{font-size:13px; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:6px 22px;}
+  .meta b{color:var(--ink-2); font-weight:600;}
+  h2{font-size:19px; margin:50px 0 16px; padding-bottom:9px; border-bottom:1px solid var(--line); letter-spacing:-.01em;}
+  h2 .num{color:var(--ink-3); font-weight:600; margin-right:10px;}
+  h3{font-size:15px; margin:30px 0 8px; color:var(--ink-2);}
+  p{margin:0 0 14px; color:var(--ink-2);}
+  .note{background:#fffbeb; border-left:4px solid var(--amber); padding:15px 20px; margin:22px 0; border-radius:0 4px 4px 0; font-size:13.5px; color:#78350f;}
+  .note b{color:#92400e;}
+  .note.danger{background:#fef2f2; border-color:var(--red); color:#7f1d1d;}
+  .note.danger b{color:#991b1b;}
+  .note.info{background:#eff6ff; border-color:var(--blue); color:#1e3a5f;}
+  .note.info b{color:#1e40af;}
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--soft); text-align:left; padding:9px 10px; border-bottom:2px solid var(--line-2);
+     font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.05em;}
+  td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+  td code,p code,li code{background:#f1f5f9; padding:1px 5px; border-radius:3px;
+     font-family:Consolas,monospace; font-size:12px; color:#0f172a;}
+  ul,ol{margin:0 0 16px; padding-left:22px; color:var(--ink-2);}
+  li{margin-bottom:6px;}
+  .diagram{background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:18px; margin:20px 0 8px;}
+  .diagram svg{display:block; width:100%; height:auto;}
+  .cap{font-size:12px; color:var(--ink-3); text-align:center; margin:0 0 26px;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  footer.doc{margin-top:56px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-3);}
+  @media print{
+    body{background:#fff; padding:0; font-size:10.5pt;}
+    .page{box-shadow:none; padding:0; max-width:none; border-radius:0;}
+    h2{page-break-after:avoid;} table,.diagram{page-break-inside:avoid;}
+    .pagebreak{page-break-before:always;}
+  }
+  @media(max-width:760px){
+    body{padding:20px 12px 48px;} .page{padding:28px 20px 40px;}
+    h1{font-size:22px;} table{font-size:11.5px;} th,td{padding:6px;}
+    .two{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc">
+  <div class="kicker">Lampiran Perangkat Keras &middot; PRD v0.5</div>
+  <h1>Perancangan &amp; Wiring — 4 Unit Alat</h1>
+  <div class="meta">
+    <span><b>Tanggal</b> 12 November 2026</span>
+    <span><b>Penyusun</b> AViSha Inovasi Indonesia</span>
+    <span><b>Status</b> Sesuai implementasi firmware v0.5 — terverifikasi build &amp; upload</span>
+    <span><b>Invoice</b> #113</span>
+  </div>
+</header>
+
+<div class="note info">
+  <b>Dokumen ini menggantikan versi v0.1 (19 Okt 2026).</b> Semua pin, modul, dan
+  koneksi di bawah sudah sesuai dengan kode firmware di <code>src/</code> dan
+  <code>platformio.ini</code>. Perubahan utama dari v0.1: urutan node disesuaikan
+  (1=HR, 2=Suhu, 3=ECG), DFPlayer diganti MAX98357A I2S, OLED SH1106 (bukan
+  SSD1306), pin ECG/LO/DS18B20 berubah, dan komunikasi via ESP-NOW WiFi internal.
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="num">1</span>Diagram Blok Sistem</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .board{fill:#eff6ff;stroke:#3b82f6;stroke-width:2;}
+    .ctrl{fill:#f0fdf4;stroke:#16a34a;stroke-width:2;}
+    .act{fill:#fff7ed;stroke:#ea580c;stroke-width:1.6;}
+    .tier1{fill:#dbeafe;stroke:#3b82f6;stroke-width:1.4;}
+    .tier2{fill:#fef3c7;stroke:#f59e0b;stroke-width:1.4;}
+    .t{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .s{fill:#64748b;font-size:11px;text-anchor:middle;}
+    .w{stroke:#475569;stroke-width:2;fill:none;}
+    .wl{stroke:#94a3b8;stroke-width:1.5;fill:none;stroke-dasharray:5 4;}
+    .pin{fill:#1e293b;font-size:10px;font-family:Consolas,monospace;text-anchor:middle;}
+    .lbl{fill:#475569;font-size:11px;text-anchor:middle;}
+  </style>
+
+  <!-- Node HR -->
+  <rect class="board" x="30" y="40" width="180" height="120" rx="8"/>
+  <text class="t" x="120" y="68">Node 1 — HR</text>
+  <text class="s" x="120" y="86">ESP32 + MAX30102</text>
+  <text class="s" x="120" y="104">Tier 1 (wajib)</text>
+  <rect class="tier1" x="55" y="120" width="130" height="28" rx="4"/>
+  <text class="s" x="120" y="138">I2C: SDA=21, SCL=22</text>
+
+  <!-- Node Suhu -->
+  <rect class="board" x="30" y="180" width="180" height="120" rx="8"/>
+  <text class="t" x="120" y="208">Node 2 — Suhu</text>
+  <text class="s" x="120" y="226">ESP32 + DS18B20</text>
+  <text class="s" x="120" y="244">Tier 1 (wajib)</text>
+  <rect class="tier1" x="55" y="260" width="130" height="28" rx="4"/>
+  <text class="s" x="120" y="278">1-Wire: DQ=GPIO22</text>
+
+  <!-- Node ECG -->
+  <rect class="board" x="30" y="320" width="180" height="90" rx="8"/>
+  <text class="t" x="120" y="348">Node 3 — ECG</text>
+  <text class="s" x="120" y="366">ESP32 + AD8232</text>
+  <text class="s" x="120" y="384">Tier 2 (opsional)</text>
+  <rect class="tier2" x="55" y="392" width="130" height="14" rx="3"/>
+  <text class="s" x="120" y="403">ADC: GPIO36, LO+=26, LO-=25</text>
+
+  <!-- ESP-NOW -->
+  <text class="lbl" x="340" y="30" font-size="12" font-weight="700">ESP-NOW 2.4 GHz</text>
+  <text class="lbl" x="340" y="46">Kanal 1 &middot; 1 paket/detik &middot; 18 byte</text>
+  <path class="w" d="M210,100 H340 V120 H470" marker-end="url(#ar)"/>
+  <path class="w" d="M210,240 H340 V240 H470" marker-end="url(#ar)"/>
+  <path class="wl" d="M210,365 H340 V360 H470"/>
+  <text class="s" x="340" y="115">1 pkt/s</text>
+  <text class="s" x="340" y="255">1 pkt/s</text>
+  <text class="s" x="340" y="375">1 pkt/s heartbeat</text>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Controller -->
+  <rect class="ctrl" x="470" y="80" width="200" height="280" rx="8"/>
+  <text class="t" x="570" y="108">Controller</text>
+  <text class="s" x="570" y="126">ESP32 + SH1106 + MAX98357A</text>
+
+  <!-- sub-modules -->
+  <rect class="act" x="490" y="145" width="160" height="34" rx="4"/>
+  <text class="s" x="570" y="163">OLED SH1106 128&times;64</text>
+  <text class="s" x="570" y="175">I2C: SDA=21, SCL=22</text>
+
+  <rect class="act" x="490" y="190" width="160" height="34" rx="4"/>
+  <text class="s" x="570" y="208">MAX98357A I2S</text>
+  <text class="s" x="570" y="220">BCLK=25, LRC=32, DIN=33</text>
+
+  <rect class="act" x="490" y="235" width="160" height="34" rx="4"/>
+  <text class="s" x="570" y="253">Speaker 40 mm</text>
+  <text class="s" x="570" y="265">3W / 4&Omega;</text>
+
+  <rect class="act" x="490" y="280" width="160" height="34" rx="4"/>
+  <text class="s" x="570" y="298">Tombol + LED</text>
+  <text class="s" x="570" y="310">BOOT=GPIO0 (reset)</text>
+
+  <rect class="act" x="490" y="325" width="160" height="28" rx="4"/>
+  <text class="s" x="570" y="343">SPIFFS: 13 MP3</text>
+  <text class="s" x="570" y="355">0001.mp3 ... 0013.mp3</text>
+
+  <!-- outputs -->
+  <path class="w" d="M670,162 H730 V100 H780" marker-end="url(#ar)"/>
+  <path class="w" d="M670,207 H730 V207 H780" marker-end="url(#ar)"/>
+  <path class="w" d="M670,297 H730 V297 H780" marker-end="url(#ar)"/>
+
+  <rect class="act" x="780" y="82" width="90" height="40" rx="5"/>
+  <text class="s" x="825" y="100">Display</text>
+  <text class="s" x="825" y="116">status vital</text>
+
+  <rect class="act" x="780" y="187" width="90" height="40" rx="5"/>
+  <text class="s" x="825" y="205">Audio</text>
+  <text class="s" x="825" y="221">panduan suara</text>
+
+  <rect class="act" x="780" y="277" width="90" height="40" rx="5"/>
+  <text class="s" x="825" y="295">Serial</text>
+  <text class="s" x="825" y="311">log/paper</text>
+</svg>
+</div>
+<p class="cap">Gambar 1 — Diagram blok sistem. 3 node mengirim data via ESP-NOW ke controller. ECG (garis putus-putus) opsional.</p>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">2</span>Tabel Pinout Lengkap (sesuai firmware)</h2>
+
+<div class="note">
+  <b>Sumber kebenaran pin = kode firmware <code>src/*.cpp</code>.</b>
+  Tabel ini dicross-check dengan <code>include/espnow_common.h</code> dan <code>platformio.ini</code>.
+  Pin yang berubah dari dokumen v0.1 ditandai dengan <span style="color:var(--red);font-weight:700">&middot;</span>.
+</div>
+
+<h3>2.1 Node 1 — HR / MAX30102 (NODE_ID=1, Tier 1)</h3>
+<table>
+  <thead><tr><th style="width:110px">Pin ESP32</th><th style="width:120px">Pin modul</th><th style="width:80px">Bus</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td>3V3</td><td>VIN</td><td>Power</td><td>Catu daya 3,3 V. <b>Jangan 5 V.</b></td></tr>
+    <tr><td>GND</td><td>GND</td><td>Power</td><td>Ground bersama</td></tr>
+    <tr><td>GPIO 21</td><td>SDA</td><td>I2C</td><td>Data I2C (0x57)</td></tr>
+    <tr><td>GPIO 22</td><td>SCL</td><td>I2C</td><td>Clock I2C</td></tr>
+    <tr><td>&mdash;</td><td>INT</td><td>I2C</td><td>Interrupt, tidak dipakai di firmware (sensor.check() polling)</td></tr>
+  </tbody>
+</table>
+<p><b>Library:</b> SparkFun MAX3010x. <b>Stabilisasi:</b> rata-rata 10 interval denyut valid (~8-15 detik). <b>Kirim:</b> 1 paket/detik via ESP-NOW.</p>
+
+<h3>2.2 Node 2 — Suhu / DS18B20 (NODE_ID=2, Tier 1)</h3>
+<table>
+  <thead><tr><th style="width:110px">Pin ESP32</th><th style="width:120px">Pin modul</th><th style="width:80px">Bus</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td>3V3</td><td>VDD</td><td>Power</td><td>Catu daya 3,3 V</td></tr>
+    <tr><td>GND</td><td>GND</td><td>Power</td><td>Ground bersama</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 22</span> <span style="color:var(--red)">&middot;</span></td><td>DQ</td><td>1-Wire</td><td>Data 1-Wire + pull-up 4,7 k&Omega; ke 3V3</td></tr>
+  </tbody>
+</table>
+<p><b>Library:</b> OneWire + DallasTemperature. <b>Stabilisasi:</b> 3 baca stabil (delta &lt; 0,2&deg;C), baca tiap 2 detik. <b>Kirim:</b> 1 paket/detik via ESP-NOW (nilai terakhir, walau sensor dibaca 2 detik).</p>
+
+<h3>2.3 Node 3 — ECG / AD8232 (NODE_ID=3, Tier 2, opsional)</h3>
+<table>
+  <thead><tr><th style="width:110px">Pin ESP32</th><th style="width:120px">Pin modul</th><th style="width:80px">Bus</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td>3V3</td><td>3.3V</td><td>Power</td><td>Catu daya modul</td></tr>
+    <tr><td>GND</td><td>GND</td><td>Power</td><td>Ground bersama</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 36</span> <span style="color:var(--red)">&middot;</span></td><td>OUTPUT</td><td>ADC1_CH0</td><td>Sinyal ECG. <b>Wajib ADC1</b> (ADC2 tidak bisa saat WiFi/ESP-NOW aktif)</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 26</span> <span style="color:var(--red)">&middot;</span></td><td>LO+</td><td>Digital</td><td>Deteksi elektroda lepas (+)</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 25</span> <span style="color:var(--red)">&middot;</span></td><td>LO&minus;</td><td>Digital</td><td>Deteksi elektroda lepas (&minus;)</td></tr>
+    <tr><td>3V3</td><td>SDN</td><td>Power</td><td>Shutdown &rarr; 3V3 = modul selalu aktif</td></tr>
+  </tbody>
+</table>
+<p><b>Stabilisasi:</b> sampling 250 Hz, hitung puncak dalam window 10 detik, BPM = puncak &times; 6. <b>Kirim:</b> heartbeat 1 paket/detik via ESP-NOW, BPM diperbarui per window. Elektroda: RA, LA, RL lewat jack 3,5 mm.</p>
+
+<h3>2.4 Controller — OLED + MAX98357A + I/O</h3>
+<table>
+  <thead><tr><th style="width:110px">Pin ESP32</th><th style="width:120px">Pin modul</th><th style="width:80px">Bus</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td colspan="4" style="background:#eff6ff;font-weight:700">OLED SH1106 128&times;64 (I2C)</td></tr>
+    <tr><td>3V3</td><td>VCC</td><td>Power</td><td>Catu daya layar 3,3 V</td></tr>
+    <tr><td>GND</td><td>GND</td><td>Power</td><td>Ground</td></tr>
+    <tr><td>GPIO 21</td><td>SDA</td><td>I2C</td><td>Data I2C (0x3C atau 0x3D)</td></tr>
+    <tr><td>GPIO 22</td><td>SCL</td><td>I2C</td><td>Clock I2C</td></tr>
+    <tr><td colspan="4" style="background:#fff7ed;font-weight:700">MAX98357A I2S Amplifier <span style="color:var(--red)">&middot; menggantikan DFPlayer</span></td></tr>
+    <tr><td>3V3 atau 5V</td><td>VIN</td><td>Power</td><td>Catu daya amplifier (cek modul: ada yang 3,3 V, ada yang 5 V)</td></tr>
+    <tr><td>GND</td><td>GND</td><td>Power</td><td>Ground bersama</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 25</span> <span style="color:var(--red)">&middot;</span></td><td>BCLK</td><td>I2S</td><td>Bit clock</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 32</span> <span style="color:var(--red)">&middot;</span></td><td>LRC / WS</td><td>I2S</td><td>Left-Right clock / Word Select</td></tr>
+    <tr><td><span style="color:var(--red)">GPIO 33</span> <span style="color:var(--red)">&middot;</span></td><td>DIN</td><td>I2S</td><td>Data audio (payload)</td></tr>
+    <tr><td>&mdash;</td><td>GAIN</td><td>&mdash;</td><td>Tidak disambung (floating = 15 dB default)</td></tr>
+    <tr><td>&mdash;</td><td>SD_MODE</td><td>&mdash;</td><td>Tidak disambung (floating = I2S mode)</td></tr>
+    <tr><td colspan="4" style="background:#f0fdf4;font-weight:700">Speaker</td></tr>
+    <tr><td>&mdash;</td><td>+ / &minus;</td><td>Audio</td><td>Speaker 4&Omega; 3W ke terminal MAX98357A. <b>Jangan ke GND.</b></td></tr>
+    <tr><td colspan="4" style="background:#f8fafc;font-weight:700">Tombol &amp; LED</td></tr>
+    <tr><td>GPIO 0 (BOOT)</td><td>Tombol</td><td>Digital</td><td>Tombol BOOT: reset pengukuran (node), uji track (controller)</td></tr>
+    <tr><td>Serial RX/TX</td><td>USB</td><td>UART</td><td>Flash firmware + log 115200 baud</td></tr>
+  </tbody>
+</table>
+
+<div class="note danger">
+  <b>Perubahan krusial dari dokumen wiring v0.1:</b>
+  <ul style="margin-top:8px">
+    <li><b>DFPlayer Mini diganti MAX98357A I2S.</b> Pin 5V/GPIO16/GPIO17/1k&Omega; tidak dipakai lagi. Audio sekarang via I2S (GPIO 25/32/33) + SPIFFS (bukan microSD).</li>
+    <li><b>OLED: SH1106 (bukan SSD1306).</b> Library <code>U8g2lib</code>, konstruktor <code>U8G2_SH1106_128X64_NONAME_F_HW_I2C</code>. Alamat di-scan 0x3C/0x3D.</li>
+    <li><b>Pin DS18B20: GPIO 22</b> (sebelumnya GPIO 4).</li>
+    <li><b>Pin ECG: GPIO 36</b> (sebelumnya GPIO 34). Wajib ADC1 karena WiFi/ESP-NOW aktif.</li>
+    <li><b>Pin LO+/LO-: GPIO 26/25</b> (sebelumnya GPIO 35/32).</li>
+    <li><b>Urutan node:</b> 1=HR, 2=Suhu, 3=ECG (sebelumnya 1=ECG, 2=HR, 3=Suhu).</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">3</span>Wiring Node</h2>
+
+<h3>3.1 Node 1 — HR / MAX30102</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .bd{fill:#eff6ff;stroke:#3b82f6;stroke-width:2;}
+    .md{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.6;}
+    .tt{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .pn{fill:#1e293b;font-size:13px;font-family:Consolas,monospace;}
+    .nt{fill:#64748b;font-size:11px;text-anchor:middle;font-style:italic;}
+    .w{stroke:#475569;stroke-width:2;}
+    .dot{fill:#475569;}
+    .pwr{stroke:#ea580c;stroke-width:2;}
+    .gnd{stroke:#475569;stroke-width:2;}
+    .i2c{stroke:#3b82f6;stroke-width:2;}
+  </style>
+  <rect class="bd" x="100" y="50" width="240" height="260" rx="8"/>
+  <text class="tt" x="220" y="78">ESP32</text>
+  <text class="tt" x="220" y="96" font-size="11" font-weight="400" fill="#64748b">Node 1 — HR (NODE_ID=1)</text>
+
+  <text class="pn" x="330" y="130" text-anchor="end">3V3</text>
+  <text class="pn" x="330" y="170" text-anchor="end">GND</text>
+  <text class="pn" x="330" y="210" text-anchor="end">GPIO 21</text>
+  <text class="pn" x="330" y="250" text-anchor="end">GPIO 22</text>
+
+  <rect class="md" x="560" y="50" width="240" height="260" rx="8"/>
+  <text class="tt" x="680" y="78">MAX30102</text>
+  <text class="tt" x="680" y="96" font-size="11" font-weight="400" fill="#64748b">SpO2 / HR sensor</text>
+
+  <text class="pn" x="570" y="130">VIN</text>
+  <text class="pn" x="570" y="170">GND</text>
+  <text class="pn" x="570" y="210">SDA</text>
+  <text class="pn" x="570" y="250">SCL</text>
+
+  <line class="pwr" x1="340" y1="125" x2="560" y2="125"/>
+  <line class="gnd" x1="340" y1="165" x2="560" y2="165"/>
+  <line class="i2c" x1="340" y1="205" x2="560" y2="205"/>
+  <line class="i2c" x1="340" y1="245" x2="560" y2="245"/>
+  <circle class="dot" cx="340" cy="125" r="3.5"/><circle class="dot" cx="560" cy="125" r="3.5"/>
+  <circle class="dot" cx="340" cy="165" r="3.5"/><circle class="dot" cx="560" cy="165" r="3.5"/>
+  <circle class="dot" cx="340" cy="205" r="3.5"/><circle class="dot" cx="560" cy="205" r="3.5"/>
+  <circle class="dot" cx="340" cy="245" r="3.5"/><circle class="dot" cx="560" cy="245" r="3.5"/>
+
+  <text class="nt" x="450" y="118">3,3 V (jangan 5 V)</text>
+  <text class="nt" x="450" y="158">ground</text>
+  <text class="nt" x="450" y="198">I2C data (0x57)</text>
+  <text class="nt" x="450" y="238">I2C clock</text>
+
+  <text class="nt" x="450" y="345" fill="#b91c1c">Modul wajib regulator 1,8 V internal. Jangan beri 5 V ke VIN.</text>
+</svg>
+</div>
+<p class="cap">Gambar 2 — Node 1 (HR). Sensor ditekan ke jari, bukan sekadar disentuh.</p>
+
+<h3>3.2 Node 2 — Suhu / DS18B20</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .bd{fill:#eff6ff;stroke:#3b82f6;stroke-width:2;}
+    .md{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.6;}
+    .tt{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .pn{fill:#1e293b;font-size:13px;font-family:Consolas,monospace;}
+    .nt{fill:#64748b;font-size:11px;text-anchor:middle;font-style:italic;}
+    .w{stroke:#475569;stroke-width:2;}
+    .dot{fill:#475569;}
+    .pwr{stroke:#ea580c;stroke-width:2;}
+    .gnd{stroke:#475569;stroke-width:2;}
+    .ow{stroke:#0d9488;stroke-width:2;}
+  </style>
+  <rect class="bd" x="100" y="50" width="240" height="200" rx="8"/>
+  <text class="tt" x="220" y="78">ESP32</text>
+  <text class="tt" x="220" y="96" font-size="11" font-weight="400" fill="#64748b">Node 2 — Suhu (NODE_ID=2)</text>
+
+  <text class="pn" x="330" y="130" text-anchor="end">3V3</text>
+  <text class="pn" x="330" y="170" text-anchor="end">GPIO 22</text>
+  <text class="pn" x="330" y="210" text-anchor="end">GND</text>
+
+  <rect class="md" x="560" y="50" width="240" height="200" rx="8"/>
+  <text class="tt" x="680" y="78">DS18B20</text>
+  <text class="tt" x="680" y="96" font-size="11" font-weight="400" fill="#64748b">probe suhu waterproof</text>
+
+  <text class="pn" x="570" y="130">VDD</text>
+  <text class="pn" x="570" y="170">DQ</text>
+  <text class="pn" x="570" y="210">GND</text>
+
+  <line class="pwr" x1="340" y1="125" x2="560" y2="125"/>
+  <line class="ow" x1="340" y1="165" x2="560" y2="165"/>
+  <line class="gnd" x1="340" y1="205" x2="560" y2="205"/>
+  <circle class="dot" cx="340" cy="125" r="3.5"/><circle class="dot" cx="560" cy="125" r="3.5"/>
+  <circle class="dot" cx="340" cy="165" r="3.5"/><circle class="dot" cx="560" cy="165" r="3.5"/>
+  <circle class="dot" cx="340" cy="205" r="3.5"/><circle class="dot" cx="560" cy="205" r="3.5"/>
+
+  <text class="nt" x="450" y="118">3,3 V</text>
+  <text class="nt" x="450" y="158">1-Wire data</text>
+  <text class="nt" x="450" y="198">ground</text>
+
+  <!-- pull-up 4.7k -->
+  <line x1="460" y1="125" x2="460" y2="135" stroke="#ea580c" stroke-width="2"/>
+  <rect x="440" y="135" width="40" height="22" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="460" y="150" text-anchor="middle" font-size="11" fill="#9a3412" font-weight="700">4,7k</text>
+  <line x1="460" y1="157" x2="460" y2="165" stroke="#ea580c" stroke-width="2"/>
+  <circle cx="460" cy="125" r="3.5" fill="#ea580c"/>
+  <circle cx="460" cy="165" r="3.5" fill="#ea580c"/>
+
+  <text class="nt" x="450" y="300" fill="#b91c1c">Pull-up 4,7 k&Omega; dari DQ ke 3V3 wajib. Mode parasit tidak dipakai.</text>
+</svg>
+</div>
+<p class="cap">Gambar 3 — Node 2 (Suhu). Probe DS18B20 waterproof, kabel keluar lewat gland.</p>
+
+<h3>3.3 Node 3 — ECG / AD8232 (opsional)</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .bd{fill:#eff6ff;stroke:#3b82f6;stroke-width:2;}
+    .md{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.6;}
+    .tt{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .pn{fill:#1e293b;font-size:13px;font-family:Consolas,monospace;}
+    .nt{fill:#64748b;font-size:11px;text-anchor:middle;font-style:italic;}
+    .w{stroke:#475569;stroke-width:2;}
+    .dot{fill:#475569;}
+    .pwr{stroke:#ea580c;stroke-width:2;}
+    .gnd{stroke:#475569;stroke-width:2;}
+    .adc{stroke:#16a34a;stroke-width:2;}
+    .dig{stroke:#7c3aed;stroke-width:2;}
+  </style>
+  <rect class="bd" x="100" y="50" width="240" height="300" rx="8"/>
+  <text class="tt" x="220" y="78">ESP32</text>
+  <text class="tt" x="220" y="96" font-size="11" font-weight="400" fill="#64748b">Node 3 — ECG (NODE_ID=3)</text>
+
+  <text class="pn" x="330" y="130" text-anchor="end">3V3</text>
+  <text class="pn" x="330" y="170" text-anchor="end">GND</text>
+  <text class="pn" x="330" y="210" text-anchor="end">GPIO 36</text>
+  <text class="pn" x="330" y="250" text-anchor="end">GPIO 26</text>
+  <text class="pn" x="330" y="290" text-anchor="end">GPIO 25</text>
+
+  <rect class="md" x="560" y="50" width="240" height="300" rx="8"/>
+  <text class="tt" x="680" y="78">AD8232</text>
+  <text class="tt" x="680" y="96" font-size="11" font-weight="400" fill="#64748b">modul ECG single-lead</text>
+
+  <text class="pn" x="570" y="130">3.3V</text>
+  <text class="pn" x="570" y="170">GND</text>
+  <text class="pn" x="570" y="210">OUTPUT</text>
+  <text class="pn" x="570" y="250">LO+</text>
+  <text class="pn" x="570" y="290">LO&minus;</text>
+
+  <line class="pwr" x1="340" y1="125" x2="560" y2="125"/>
+  <line class="gnd" x1="340" y1="165" x2="560" y2="165"/>
+  <line class="adc" x1="340" y1="205" x2="560" y2="205"/>
+  <line class="dig" x1="340" y1="245" x2="560" y2="245"/>
+  <line class="dig" x1="340" y1="285" x2="560" y2="285"/>
+  <circle class="dot" cx="340" cy="125" r="3.5"/><circle class="dot" cx="560" cy="125" r="3.5"/>
+  <circle class="dot" cx="340" cy="165" r="3.5"/><circle class="dot" cx="560" cy="165" r="3.5"/>
+  <circle class="dot" cx="340" cy="205" r="3.5"/><circle class="dot" cx="560" cy="205" r="3.5"/>
+  <circle class="dot" cx="340" cy="245" r="3.5"/><circle class="dot" cx="560" cy="245" r="3.5"/>
+  <circle class="dot" cx="340" cy="285" r="3.5"/><circle class="dot" cx="560" cy="285" r="3.5"/>
+
+  <text class="nt" x="450" y="118">catu daya 3,3 V</text>
+  <text class="nt" x="450" y="158">ground</text>
+  <text class="nt" x="450" y="198">sinyal ECG (ADC1_CH0)</text>
+  <text class="nt" x="450" y="238">deteksi elektroda (+)</text>
+  <text class="nt" x="450" y="278">deteksi elektroda (&minus;)</text>
+
+  <text class="nt" x="450" y="365" fill="#b91c1c">GPIO 36 = ADC1_CH0. Wajib ADC1 karena WiFi/ESP-NOW aktif. ADC2 tidak bisa.</text>
+  <text class="nt" x="450" y="385">SDN disambung ke 3V3. Elektroda: RA, LA, RL lewat jack 3,5 mm.</text>
+</svg>
+</div>
+<p class="cap">Gambar 4 — Node 3 (ECG). Opsional, Tier 2. Elektroda pada dada pasien.</p>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">4</span>Wiring Controller</h2>
+
+<h3>4.1 OLED SH1106 128&times;64</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .bd{fill:#f0fdf4;stroke:#16a34a;stroke-width:2;}
+    .md{fill:#fff7ed;stroke:#ea580c;stroke-width:1.6;}
+    .tt{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .pn{fill:#1e293b;font-size:13px;font-family:Consolas,monospace;}
+    .nt{fill:#64748b;font-size:11px;text-anchor:middle;font-style:italic;}
+    .w{stroke:#475569;stroke-width:2;}
+    .dot{fill:#475569;}
+    .i2c{stroke:#3b82f6;stroke-width:2;}
+    .pwr{stroke:#ea580c;stroke-width:2;}
+    .gnd{stroke:#475569;stroke-width:2;}
+  </style>
+  <rect class="bd" x="100" y="50" width="240" height="200" rx="8"/>
+  <text class="tt" x="220" y="78">ESP32</text>
+  <text class="tt" x="220" y="96" font-size="11" font-weight="400" fill="#64748b">Controller</text>
+
+  <text class="pn" x="330" y="130" text-anchor="end">3V3</text>
+  <text class="pn" x="330" y="170" text-anchor="end">GND</text>
+  <text class="pn" x="330" y="210" text-anchor="end">GPIO 21</text>
+
+  <text class="pn" x="330" y="250" text-anchor="end">GPIO 22</text>
+
+  <rect class="md" x="560" y="50" width="240" height="200" rx="8"/>
+  <text class="tt" x="680" y="78">OLED SH1106</text>
+  <text class="tt" x="680" y="96" font-size="11" font-weight="400" fill="#64748b">128&times;64 I2C</text>
+
+  <text class="pn" x="570" y="130">VCC</text>
+  <text class="pn" x="570" y="170">GND</text>
+  <text class="pn" x="570" y="210">SDA</text>
+  <text class="pn" x="570" y="250">SCL</text>
+
+  <line class="pwr" x1="340" y1="125" x2="560" y2="125"/>
+  <line class="gnd" x1="340" y1="165" x2="560" y2="165"/>
+  <line class="i2c" x1="340" y1="205" x2="560" y2="205"/>
+  <line class="i2c" x1="340" y1="245" x2="560" y2="245"/>
+  <circle class="dot" cx="340" cy="125" r="3.5"/><circle class="dot" cx="560" cy="125" r="3.5"/>
+  <circle class="dot" cx="340" cy="165" r="3.5"/><circle class="dot" cx="560" cy="165" r="3.5"/>
+  <circle class="dot" cx="340" cy="205" r="3.5"/><circle class="dot" cx="560" cy="205" r="3.5"/>
+  <circle class="dot" cx="340" cy="245" r="3.5"/><circle class="dot" cx="560" cy="245" r="3.5"/>
+
+  <text class="nt" x="450" y="118">3,3 V</text>
+  <text class="nt" x="450" y="158">ground</text>
+  <text class="nt" x="450" y="198">I2C data</text>
+  <text class="nt" x="450" y="238">I2C clock</text>
+
+  <text class="nt" x="450" y="290">Alamat di-scan: 0x3C atau 0x3D. Library: U8g2 (SH1106, bukan SSD1306).</text>
+</svg>
+</div>
+<p class="cap">Gambar 5 — OLED SH1106. Firmware scan alamat 0x3C/0x3D otomatis.</p>
+
+<h3>4.2 MAX98357A I2S Amplifier + Speaker</h3>
+<div class="diagram">
+<svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .bd{fill:#f0fdf4;stroke:#16a34a;stroke-width:2;}
+    .md{fill:#fff7ed;stroke:#ea580c;stroke-width:1.6;}
+    .sp{fill:#fef3c7;stroke:#f59e0b;stroke-width:1.6;}
+    .tt{fill:#0f172a;font-size:14px;font-weight:700;text-anchor:middle;}
+    .pn{fill:#1e293b;font-size:13px;font-family:Consolas,monospace;}
+    .nt{fill:#64748b;font-size:11px;text-anchor:middle;font-style:italic;}
+    .w{stroke:#475569;stroke-width:2;}
+    .dot{fill:#475569;}
+    .i2s{stroke:#7c3aed;stroke-width:2;}
+    .pwr{stroke:#ea580c;stroke-width:2;}
+    .gnd{stroke:#475569;stroke-width:2;}
+    .aud{stroke:#f59e0b;stroke-width:2.5;}
+  </style>
+  <rect class="bd" x="80" y="40" width="240" height="280" rx="8"/>
+  <text class="tt" x="200" y="68">ESP32</text>
+  <text class="tt" x="200" y="86" font-size="11" font-weight="400" fill="#64748b">Controller</text>
+
+  <text class="pn" x="310" y="120" text-anchor="end">3V3/5V</text>
+  <text class="pn" x="310" y="160" text-anchor="end">GND</text>
+  <text class="pn" x="310" y="200" text-anchor="end">GPIO 25</text>
+  <text class="pn" x="310" y="240" text-anchor="end">GPIO 32</text>
+  <text class="pn" x="310" y="280" text-anchor="end">GPIO 33</text>
+
+  <rect class="md" x="540" y="40" width="240" height="280" rx="8"/>
+  <text class="tt" x="660" y="68">MAX98357A</text>
+  <text class="tt" x="660" y="86" font-size="11" font-weight="400" fill="#64748b">I2S amplifier</text>
+
+  <text class="pn" x="550" y="120">VIN</text>
+  <text class="pn" x="550" y="160">GND</text>
+  <text class="pn" x="550" y="200">BCLK</text>
+  <text class="pn" x="550" y="240">LRC / WS</text>
+  <text class="pn" x="550" y="280">DIN</text>
+
+  <line class="pwr" x1="320" y1="115" x2="540" y2="115"/>
+  <line class="gnd" x1="320" y1="155" x2="540" y2="155"/>
+  <line class="i2s" x1="320" y1="195" x2="540" y2="195"/>
+  <line class="i2s" x1="320" y1="235" x2="540" y2="235"/>
+  <line class="i2s" x1="320" y1="275" x2="540" y2="275"/>
+  <circle class="dot" cx="320" cy="115" r="3.5"/><circle class="dot" cx="540" cy="115" r="3.5"/>
+  <circle class="dot" cx="320" cy="155" r="3.5"/><circle class="dot" cx="540" cy="155" r="3.5"/>
+  <circle class="dot" cx="320" cy="195" r="3.5"/><circle class="dot" cx="540" cy="195" r="3.5"/>
+  <circle class="dot" cx="320" cy="235" r="3.5"/><circle class="dot" cx="540" cy="235" r="3.5"/>
+  <circle class="dot" cx="320" cy="275" r="3.5"/><circle class="dot" cx="540" cy="275" r="3.5"/>
+
+  <text class="nt" x="430" y="108">catu daya</text>
+  <text class="nt" x="430" y="148">ground</text>
+  <text class="nt" x="430" y="188">I2S bit clock</text>
+  <text class="nt" x="430" y="228">I2S LRC / word select</text>
+  <text class="nt" x="430" y="268">I2S data audio</text>
+
+  <!-- Speaker -->
+  <rect class="sp" x="560" y="340" width="200" height="44" rx="6"/>
+  <text class="tt" x="660" y="362" font-size="13">Speaker 4&Omega; 3W</text>
+  <text class="tt" x="660" y="378" font-size="10" font-weight="400" fill="#92400e">&Oslash; 40 mm</text>
+
+  <line class="aud" x1="660" y1="320" x2="660" y2="340"/>
+  <line class="aud" x1="680" y1="320" x2="680" y2="340"/>
+  <circle cx="660" cy="320" r="3" fill="#f59e0b"/>
+  <circle cx="680" cy="320" r="3" fill="#f59e0b"/>
+  <text class="nt" x="670" y="335" fill="#92400e">+ / &minus;</text>
+
+  <text class="nt" x="430" y="395" fill="#b91c1c">GAIN dan SD_MODE tidak disambung (floating). MP3 di-decode firmware via ESP8266Audio.</text>
+</svg>
+</div>
+<p class="cap">Gambar 6 — MAX98357A I2S + Speaker. Menggantikan DFPlayer Mini + microSD.</p>
+
+<h3>4.3 Komunikasi ESP-NOW (WiFi Internal)</h3>
+<div class="note info">
+  <b>ESP-NOW memakai radio WiFi internal ESP32 — tidak perlu modul/kabel ekstra.</b>
+  Yang perlu disiapkan di perakitan:
+  <ul style="margin-top:8px">
+    <li>Pastikan antena PCB ESP32 (area logam di tepi board) tidak tertutup metal casing/foil.</li>
+    <li>Semua 4 board di kanal WiFi yang sama: <code>ESPNOW_CHANNEL=1</code> (sudah di <code>platformio.ini</code>).</li>
+    <li>Mode: <code>WIFI_STA</code>, power-save dimatikan (<code>WIFI_PS_NONE</code>).</li>
+    <li>Jarak maksimum praktis: ~30 m dalam ruangan, ~100 m line-of-sight.</li>
+    <li>Payload: 18 byte packed struct, 1 paket/detik per node.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">5</span>Catu Daya</h2>
+
+<div class="note danger">
+  <b>Invoice #113: tanpa baterai.</b> Catu daya harus disiapkan terpisah.
+  Rekomendasi: USB power bank 5 V per unit untuk prototipe/uji; adaptor 5 V DC untuk uji laboratorium.
+</div>
+
+<h3>5.1 Node (HR, Suhu, ECG)</h3>
+<table>
+  <thead><tr><th style="width:140px">Komponen</th><th style="width:100px">Tegangan</th><th style="width:100px">Arus</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>ESP32 DevKit</td><td>3,3 V (via reg. on-board)</td><td>~120 mA</td><td>Daya dari USB 5 V, regulator internal AMS1117 ke 3,3 V</td></tr>
+    <tr><td>MAX30102</td><td>3,3 V</td><td>~1,5 mA</td><td>I2C, regulator 1,8 V di modul</td></tr>
+    <tr><td>DS18B20</td><td>3,3 V</td><td>~1,5 mA</td><td>1-Wire, pull-up 4,7 k&Omega;</td></tr>
+    <tr><td>AD8232</td><td>3,3 V</td><td>~2 mA</td><td>ADC, op-amp</td></tr>
+    <tr><td><b>Total node</b></td><td><b>3,3 V (dari USB 5 V)</b></td><td><b>~125 mA</b></td><td>Satu rail 3,3 V cukup; tidak ada speaker</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Controller</h3>
+<table>
+  <thead><tr><th style="width:140px">Komponen</th><th style="width:100px">Tegangan</th><th style="width:100px">Arus</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>ESP32 DevKit</td><td>3,3 V (via reg. on-board)</td><td>~200 mA</td><td>WiFi/ESP-NOW aktif menarik lebih banyak</td></tr>
+    <tr><td>OLED SH1106</td><td>3,3 V</td><td>~30 mA</td><td>I2C</td></tr>
+    <tr><td>MAX98357A</td><td>3,3 V atau 5 V</td><td>~10 mA idle, ~500 mA peak</td><td>Saat audio diputar, arus puncak tinggi</td></tr>
+    <tr><td>Speaker 40 mm</td><td>&mdash;</td><td>&mdash;</td><td>Diaruskan via MAX98357A, bukan langsung ESP32</td></tr>
+    <tr><td><b>Total controller</b></td><td><b>5 V minimum 1 A</b></td><td><b>~250 mA avg, 700 mA peak</b></td><td>Power bank 5 V/1 A cukup; adaptor 5 V/2 A disarankan</td></tr>
+  </tbody>
+</table>
+
+<div class="diagram">
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .b1{fill:#f8fafc;stroke:#94a3b8;stroke-width:1.6;}
+    .b2{fill:#eff6ff;stroke:#3b82f6;stroke-width:1.8;}
+    .b3{fill:#fff7ed;stroke:#ea580c;stroke-width:1.6;}
+    .b4{fill:#f0fdf4;stroke:#16a34a;stroke-width:1.6;}
+    .t{fill:#0f172a;font-size:12.5px;text-anchor:middle;font-weight:600;}
+    .s{fill:#64748b;font-size:11px;text-anchor:middle;}
+    .l{stroke:#475569;stroke-width:1.8;fill:none;}
+  </style>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <text class="s" x="450" y="24" font-weight="700" fill="#0f172a">CONTROLLER</text>
+
+  <rect class="b1" x="30" y="90" width="150" height="60" rx="5"/>
+  <text class="t" x="105" y="118">USB / adaptor</text>
+  <text class="s" x="105" y="136">5 V / 2 A min</text>
+
+  <path class="l" marker-end="url(#a2)" d="M180,120 H250"/>
+
+  <rect class="b2" x="250" y="90" width="130" height="60" rx="5"/>
+  <text class="t" x="315" y="118">ESP32 reg.</text>
+  <text class="s" x="315" y="136">AMS1117 3,3 V</text>
+
+  <path class="l" marker-end="url(#a2)" d="M380,110 H440 V70 H520"/>
+  <path class="l" marker-end="url(#a2)" d="M380,120 H520"/>
+  <path class="l" marker-end="url(#a2)" d="M180,130 H200 V190 H520"/>
+
+  <rect class="b3" x="520" y="42" width="170" height="46" rx="5"/>
+  <text class="t" x="605" y="62">ESP32 + WiFi</text>
+  <text class="s" x="605" y="78">3,3 V &middot; ~200 mA</text>
+
+  <rect class="b4" x="520" y="98" width="170" height="46" rx="5"/>
+  <text class="t" x="605" y="118">OLED SH1106</text>
+  <text class="s" x="605" y="134">3,3 V &middot; ~30 mA</text>
+
+  <rect class="b3" x="520" y="154" width="170" height="46" rx="5"/>
+  <text class="t" x="605" y="174">MAX98357A + speaker</text>
+  <text class="s" x="605" y="190">5 V atau 3,3 V &middot; 500 mA peak</text>
+
+  <text class="s" x="380" y="230" fill="#b91c1c">MAX98357A bisa ambil 5 V langsung atau 3,3 V (cek modul). Tidak lewat regulator ESP32.</text>
+</svg>
+</div>
+<p class="cap">Gambar 7 — Topologi daya controller. ESP32 dan OLED dari regulator 3,3 V; MAX98357A dari rail 5 V atau 3,3 V.</p>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">6</span>Casing</h2>
+
+<h3>6.1 Casing Node (3 unit)</h3>
+<p>Dimensi luar <b>80 &times; 50 &times; 33 mm</b>, tebal dinding 2,5 mm, tutup atas dengan 4 sekrup M3.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 840 600" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .body{fill:#f8fafc;stroke:#334155;stroke-width:2;}
+    .hole{fill:#fff;stroke:#94a3b8;stroke-width:1.2;}
+    .cut{fill:#e2e8f0;stroke:#64748b;stroke-width:1.1;}
+    .lbl{fill:#0f172a;font-size:12px;font-weight:700;text-anchor:middle;}
+    .dim{stroke:#64748b;stroke-width:1;fill:none;}
+    .dimt{fill:#475569;font-size:11px;text-anchor:middle;}
+    .feat{fill:#64748b;font-size:10px;text-anchor:middle;}
+  </style>
+  <defs>
+    <marker id="d1" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,4 L8,4" stroke="#64748b" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- FRONT -->
+  <text class="lbl" x="270" y="46">TAMPAK DEPAN</text>
+  <rect class="body" x="90" y="70" width="360" height="148" rx="6"/>
+  <rect class="cut" x="248" y="200" width="45" height="18" rx="2"/>
+  <text class="feat" x="270" y="192">USB</text>
+  <circle class="hole" cx="396" cy="142" r="11"/>
+  <text class="feat" x="396" y="122">LED &Oslash;5</text>
+  <circle class="hole" cx="144" cy="160" r="18"/>
+  <text class="feat" x="144" y="134">gland &Oslash;8</text>
+
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M90,250 H450"/>
+  <text class="dimt" x="270" y="266">80 mm</text>
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M62,70 V218"/>
+  <text class="dimt" x="44" y="148" transform="rotate(-90 44 148)">33 mm</text>
+
+  <!-- TOP -->
+  <text class="lbl" x="270" y="298">TAMPAK ATAS</text>
+  <rect class="body" x="90" y="310" width="360" height="225" rx="6"/>
+  <rect class="cut" x="180" y="330" width="81" height="9" rx="2"/>
+  <rect class="cut" x="180" y="350" width="81" height="9" rx="2"/>
+  <rect class="cut" x="180" y="370" width="81" height="9" rx="2"/>
+  <rect class="cut" x="180" y="390" width="81" height="9" rx="2"/>
+  <text class="feat" x="220" y="418">vent 18 &times; 2 mm</text>
+
+  <circle class="hole" cx="113" cy="333" r="14"/>
+  <circle class="hole" cx="427" cy="333" r="14"/>
+  <circle class="hole" cx="113" cy="512" r="14"/>
+  <circle class="hole" cx="427" cy="512" r="14"/>
+  <text class="feat" x="270" y="526">4 &times; boss sekrup M3</text>
+
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M450,310 V535"/>
+  <text class="dimt" x="468" y="426" transform="rotate(-90 468 426)">50 mm</text>
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M90,562 H450"/>
+  <text class="dimt" x="270" y="578">80 mm</text>
+
+  <!-- SIDE -->
+  <text class="lbl" x="672" y="46">TAMPAK SAMPING</text>
+  <rect class="body" x="560" y="70" width="225" height="148" rx="6"/>
+  <rect class="cut" x="600" y="120" width="120" height="48" rx="3"/>
+  <text class="feat" x="660" y="112">label 30 &times; 12 mm</text>
+
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M560,250 H785"/>
+  <text class="dimt" x="672" y="266">50 mm</text>
+  <path class="dim" marker-start="url(#d1)" marker-end="url(#d1)" d="M532,70 V218"/>
+  <text class="dimt" x="514" y="148" transform="rotate(-90 514 148)">33 mm</text>
+</svg>
+</div>
+<p class="cap">Gambar 8 — Casing node, tiga tampak.</p>
+
+<h3>Varian per node</h3>
+<table>
+  <thead><tr><th style="width:100px">Node</th><th style="width:220px">Bukaan yang berubah</th><th>Alasan</th></tr></thead>
+  <tbody>
+    <tr><td><b>Node 1 (HR)</b></td><td>Gland diganti <b>jendela jari &Oslash; 16 mm</b> di tutup atas; vent dipindah samping</td><td>Jari harus menekan sensor MAX30102, bukan menyentuh casing</td></tr>
+    <tr><td><b>Node 2 (Suhu)</b></td><td>Gland &Oslash;8 di kiri, vent dihapus</td><td>Probe DS18B20 berbentuk kabel waterproof</td></tr>
+    <tr><td><b>Node 3 (ECG)</b></td><td>Gland &Oslash;8 di kiri</td><td>Kabel 3 elektroda (RA, LA, RL) keluar dari box</td></tr>
+  </tbody>
+</table>
+
+<h3>6.2 Casing Controller</h3>
+<p>Dimensi luar <b>115 &times; 85 &times; 50 mm</b>, tebal dinding 2,5 mm, tutup atas dengan 4 sekrup M3.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 980 760" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .body{fill:#f8fafc;stroke:#334155;stroke-width:2;}
+    .hole{fill:#fff;stroke:#94a3b8;stroke-width:1.2;}
+    .cut{fill:#e2e8f0;stroke:#64748b;stroke-width:1.1;}
+    .win{fill:#dbeafe;stroke:#3b82f6;stroke-width:1.4;}
+    .lbl{fill:#0f172a;font-size:12px;font-weight:700;text-anchor:middle;}
+    .dim{stroke:#64748b;stroke-width:1;fill:none;}
+    .dimt{fill:#475569;font-size:11px;text-anchor:middle;}
+    .feat{fill:#64748b;font-size:10px;text-anchor:middle;}
+  </style>
+  <defs>
+    <marker id="d2" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,4 L8,4" stroke="#64748b" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- FRONT -->
+  <text class="lbl" x="275" y="46">TAMPAK DEPAN</text>
+  <rect class="body" x="80" y="70" width="391" height="170" rx="6"/>
+  <rect class="win" x="230" y="104" width="92" height="48" rx="3"/>
+  <text class="feat" x="276" y="98">jendela OLED 27 &times; 14</text>
+
+  <circle class="hole" cx="223" cy="179" r="20"/>
+  <circle class="hole" cx="276" cy="179" r="20"/>
+  <circle class="hole" cx="328" cy="179" r="20"/>
+  <text class="feat" x="276" y="216">3 &times; tombol &Oslash;12</text>
+
+  <circle class="hole" cx="437" cy="216" r="9"/>
+  <text class="feat" x="437" y="196">LED</text>
+
+  <rect class="cut" x="107" y="206" width="44" height="24" rx="2"/>
+  <text class="feat" x="129" y="198">saklar</text>
+
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M80,272 H471"/>
+  <text class="dimt" x="275" y="288">115 mm</text>
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M52,70 V240"/>
+  <text class="dimt" x="34" y="155" transform="rotate(-90 34 155)">50 mm</text>
+
+  <!-- TOP -->
+  <text class="lbl" x="275" y="326">TAMPAK ATAS</text>
+  <rect class="body" x="80" y="338" width="391" height="289" rx="6"/>
+
+  <circle cx="276" cy="470" r="75" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <circle cx="276" cy="470" r="62" fill="none" stroke="#64748b" stroke-width="1.2"/>
+  <rect class="cut" x="224" y="424" width="104" height="8" rx="3"/>
+  <rect class="cut" x="224" y="444" width="104" height="8" rx="3"/>
+  <rect class="cut" x="224" y="464" width="104" height="8" rx="3"/>
+  <rect class="cut" x="224" y="484" width="104" height="8" rx="3"/>
+  <rect class="cut" x="224" y="504" width="104" height="8" rx="3"/>
+  <text class="feat" x="276" y="560">gril speaker &Oslash;44 — 5 slot 30 &times; 2,5 mm</text>
+
+  <circle class="hole" cx="103" cy="361" r="14"/>
+  <circle class="hole" cx="448" cy="361" r="14"/>
+  <circle class="hole" cx="103" cy="604" r="14"/>
+  <circle class="hole" cx="448" cy="604" r="14"/>
+  <text class="feat" x="276" y="618">4 &times; boss sekrup M3</text>
+
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M471,338 V627"/>
+  <text class="dimt" x="489" y="482" transform="rotate(-90 489 482)">85 mm</text>
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M80,656 H471"/>
+  <text class="dimt" x="275" y="672">115 mm</text>
+
+  <!-- SIDE -->
+  <text class="lbl" x="700" y="46">TAMPAK SAMPING</text>
+  <rect class="body" x="556" y="70" width="289" height="170" rx="6"/>
+  <circle class="hole" cx="598" cy="112" r="15"/>
+  <text class="feat" x="598" y="86">jack &Oslash;9</text>
+  <rect class="cut" x="660" y="140" width="34" height="14" rx="2"/>
+  <text class="feat" x="677" y="132">USB</text>
+
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M556,272 H845"/>
+  <text class="dimt" x="700" y="288">85 mm</text>
+  <path class="dim" marker-start="url(#d2)" marker-end="url(#d2)" d="M528,70 V240"/>
+  <text class="dimt" x="510" y="155" transform="rotate(-90 510 155)">50 mm</text>
+</svg>
+</div>
+<p class="cap">Gambar 9 — Casing controller, tiga tampak.</p>
+
+<h3>Tabel bukaan casing controller</h3>
+<table>
+  <thead><tr><th style="width:150px">Bukaan</th><th style="width:120px">Dimensi</th><th style="width:150px">Posisi</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>Jendela OLED</td><td>27 &times; 14 mm</td><td>Depan, tengah atas</td><td>SH1106 area aktif</td></tr>
+    <tr><td>Tombol</td><td>&Oslash; 12 mm &times; 3</td><td>Depan, bawah</td><td>OK / Next / Mute (atau test/stop/pairing via Serial)</td></tr>
+    <tr><td>LED</td><td>&Oslash; 5 mm &times; 2</td><td>Depan, kanan bawah</td><td>Hijau normal, merah alarm</td></tr>
+    <tr><td>Saklar daya</td><td>13 &times; 7 mm</td><td>Depan, kiri bawah</td><td>Toggle SPDT</td></tr>
+    <tr><td>Gril speaker</td><td>&Oslash; 44 mm, 5 slot</td><td>Atas, tengah</td><td>Speaker 40 mm di bawah gril</td></tr>
+    <tr><td>Jack DC</td><td>&Oslash; 9 mm</td><td>Samping, kiri atas</td><td>Input 5 V (jika adaptor)</td></tr>
+    <tr><td>USB</td><td>10 &times; 4 mm</td><td>Samping, tengah</td><td>Flash firmware + power</td></tr>
+    <tr><td>Boss sekrup</td><td>&Oslash; 6 &times; 4</td><td>Sudut, inset 6 mm</td><td>Sekrup M3 &times; 12 mm</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <b>Tidak ada slot microSD lagi.</b> DFPlayer sudah diganti MAX98357A. Audio
+  tersimpan di SPIFFS flash internal ESP32, di-upload via <code>pio run -e controller -t uploadfs</code>.
+  Casing controller tidak perlu lubang microSD.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak"><span class="num">7</span>Rincian Biaya Pekerjaan</h2>
+
+<table>
+  <thead><tr><th style="width:280px">Pekerjaan</th><th style="width:120px">Biaya (Rp)</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Perancangan &amp; wiring</td><td>200.000</td><td><b>Selesai</b> — dokumen ini, 9 diagram SVG, tabel pinout lengkap</td></tr>
+    <tr><td>Programming ESP32 &amp; integrasi sensor</td><td>500.000</td><td><b>Selesai</b> — 4 firmware, ESP-NOW, stabilisasi sensor</td></tr>
+    <tr><td>Tampilan display + sistem suara</td><td>200.000</td><td><b>Selesai</b> — OLED SH1106, MAX98357A I2S, 13 MP3 TTS</td></tr>
+    <tr><td>Decision logic &amp; panduan first aid</td><td>300.000</td><td>Selesai (prototipe) — klasifikasi HR/Suhu, TTS first aid (119/112). Ambang final & first aid klinis perlu persetujuan.</td></tr>
+    <tr><td>Perakitan &amp; testing</td><td>250.000</td><td>Selesai (build + upload). Pengujian integrasi fisik menunggu perakitan casing.</td></tr>
+    <tr><td>Debugging &amp; penyempurnaan prototype</td><td>200.000</td><td>Selesai — 4 env build sukses, SPIFFS image sukses, koreksi NODE_ID, BEATS, library audio</td></tr>
+    <tr><td>Dokumentasi &amp; finishing</td><td>200.000</td><td><b>Dokumen ini + PRD v0.5 + Lampiran Teknis + generate_tts.py</b>. Paper menunggu hasil pengujian aktual.</td></tr>
+    <tr style="border-top:2px solid var(--ink)"><td style="font-weight:700">Total</td><td style="font-weight:700">1.850.000</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2><span class="num">8</span>Catatan Perakitan</h2>
+
+<ol>
+  <li><b>Ukur modul dulu sebelum cetak casing.</b> Modul AD8232 dan MAX30102 yang beredar punya ukuran berbeda antar penjual.</li>
+  <li><b>Uji rangkaian di breadboard</b> sebelum solder ke PCB permanen.</li>
+  <li><b>Beri label tiap node</b> (N1=HR, N2=Suhu, N3=ECG) di dalam dan luar box.</li>
+  <li><b>Semua GND disatukan</b> per unit. Jangan ada ground terpisah antara sensor dan ESP32.</li>
+  <li><b>Antena WiFi tidak boleh tertutup metal.</b> ESP-NOW pakai radio 2,4 GHz; foil/metal casing akan memblokir sinyal.</li>
+  <li><b>Urutan uji:</b> sensor satu per satu &rarr; ESP-NOW satu node &rarr; dua node inti &rarr; audio &rarr; OLED &rarr; casing.</li>
+  <li><b>Flash firmware:</b> <code>pio run -e &lt;env&gt; -t upload</code>. Upload audio: <code>pio run -e controller -t uploadfs</code>.</li>
+  <li><b>MAC pairing:</b> saat pertama kali nyala, controller mencetak MAC tiap node ke Serial. Salin ke <code>NODE_MAC_*</code> di <code>controller.cpp</code> lalu aktifkan <code>-DESPNOW_STRICT_MAC=1</code>.</li>
+</ol>
+
+<h3>Yang perlu diukur ulang sebelum cetak casing</h3>
+<table>
+  <thead><tr><th style="width:220px">Komponen</th><th style="width:150px">Asumsi</th><th>Yang harus diukur</th></tr></thead>
+  <tbody>
+    <tr><td>ESP32 DevKit 30 pin</td><td>55 &times; 28 mm</td><td>Panjang total termasuk USB, tinggi header</td></tr>
+    <tr><td>MAX30102 breakout</td><td>14 &times; 14 mm</td><td>Tinggi komponen di atas PCB</td></tr>
+    <tr><td>DS18B20 probe</td><td>&Oslash; 6 mm kabel</td><td>Panjang kabel probe</td></tr>
+    <tr><td>AD8232 breakout</td><td>35 &times; 25 mm</td><td>Ukuran PCB, posisi lubang</td></tr>
+    <tr><td>OLED SH1106 1,3"</td><td>30 &times; 30 mm</td><td>Posisi jendela aktif terhadap tepi PCB</td></tr>
+    <tr><td>MAX98357A breakout</td><td>20 &times; 18 mm</td><td>Posisi terminal speaker</td></tr>
+    <tr><td>Speaker</td><td>&Oslash; 40 mm</td><td>Diameter luar dan tinggi magnet</td></tr>
+  </tbody>
+</table>
+
+<footer class="doc">
+  Lampiran Perangkat Keras &mdash; PRD Sistem Monitoring Parameter Fisiologis Berbasis ESP32 v0.5 &middot;
+  12 November 2026 &middot; AViSha Inovasi Indonesia &middot; Invoice #113
+</footer>
+
+</div>
+</body>
+</html>

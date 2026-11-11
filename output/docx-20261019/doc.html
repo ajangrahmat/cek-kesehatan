@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="docx-page-size" content="A4">
+<title>PRD dan Lampiran Teknis — Sistem Monitoring Parameter Fisiologis Berbasis ESP32</title>
+<style>
+:root{
+  --ff-heading: "Segoe UI", Arial, sans-serif;
+  --ff-body: "Segoe UI", Arial, sans-serif;
+  --fs-h1: 18pt;
+  --fs-h2: 14pt;
+  --fs-h3: 11.5pt;
+  --fs-body: 10.5pt;
+  --fs-small: 9pt;
+  --color-primary: #1f3a5f;
+  --color-accent: #b45309;
+  --color-text: #1e293b;
+  --color-muted: #64748b;
+  --color-border: #d5dde6;
+  --color-soft: #f4f7fa;
+  --spacing-paragraph: 6pt;
+  --spacing-section: 18pt;
+  --page-content-width: 15.6cm;
+}
+@page { @bottom-center { content: counter(page) " / " counter(pages); } }
+@page cover { @bottom-center { content: none; } }
+section[role="cover"] { page: cover; }
+
+body{
+  font-family: var(--ff-body);
+  font-size: var(--fs-body);
+  color: var(--color-text);
+  line-height: 1.55;
+  max-width: var(--page-content-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+p{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+   margin-top: 0; margin-bottom: var(--spacing-paragraph); text-align: justify; }
+h1{ font-family: var(--ff-heading); font-size: var(--fs-h1); color: var(--color-primary);
+    margin-top: 0; margin-bottom: 8pt; text-align: left; }
+h2{ font-family: var(--ff-heading); font-size: var(--fs-h2); color: var(--color-primary);
+    margin-top: var(--spacing-section); margin-bottom: 6pt; text-align: left;
+    border-bottom: 1px solid var(--color-border); padding-bottom: 3pt; }
+h3{ font-family: var(--ff-heading); font-size: var(--fs-h3); color: var(--color-text);
+    margin-top: 12pt; margin-bottom: 4pt; text-align: left; }
+ul, ol{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+        margin-top: 0; margin-bottom: var(--spacing-paragraph); }
+li{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+    margin-bottom: 3pt; text-align: left; }
+table{ width: 100%; border-collapse: collapse; margin-top: 6pt; margin-bottom: 10pt;
+       font-family: var(--ff-body); font-size: var(--fs-small); }
+th{ background: var(--color-soft); color: var(--color-primary); font-family: var(--ff-heading);
+    font-size: var(--fs-small); font-weight: bold; text-align: left;
+    border: 1px solid var(--color-border); padding: 4pt 5pt; }
+td{ font-family: var(--ff-body); font-size: var(--fs-small); color: var(--color-text);
+    border: 1px solid var(--color-border); padding: 4pt 5pt; text-align: left; vertical-align: top; }
+img{ width: 100%; }
+.cap{ font-family: var(--ff-body); font-size: var(--fs-small); color: var(--color-muted);
+      text-align: center; margin-top: 2pt; margin-bottom: 12pt; }
+.lead{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+       text-align: justify; }
+.warn{ border-left: 3px solid var(--color-accent); background: #fdf6ec;
+       padding: 6pt 8pt; margin-top: 8pt; margin-bottom: 10pt;
+       font-family: var(--ff-body); font-size: var(--fs-small); color: #6b3f0c; text-align: justify; }
+.eyebrow{ font-family: var(--ff-heading); font-size: 9pt; color: var(--color-muted);
+          text-align: center; letter-spacing: 2pt; margin-bottom: 6pt; }
+.cover-title{ font-family: var(--ff-heading); font-size: 24pt; color: var(--color-primary);
+              text-align: center; margin-top: 0; margin-bottom: 8pt; line-height: 1.25; }
+.cover-sub{ font-family: var(--ff-body); font-size: 11pt; color: var(--color-text);
+            text-align: center; margin-bottom: 30pt; }
+.cover-info{ width: 11cm; margin-left: auto; margin-right: auto; }
+.cover-info td{ border: none; border-bottom: 1px solid var(--color-border);
+                padding: 5pt 4pt; font-size: 9.5pt; }
+.cover-foot{ font-family: var(--ff-body); font-size: 9pt; color: var(--color-muted);
+             text-align: center; margin-top: 40pt; }
+.pb{ page-break-before: always; }
+</style>
+</head>
+<body>
+
+<section role="cover">
+  <p class="eyebrow">PRD &amp; LAMPIRAN TEKNIS</p>
+  <h1 class="cover-title">Sistem Monitoring Parameter Fisiologis Berbasis ESP32</h1>
+  <p class="cover-sub">Prototipe 4 unit alat — 3 node sensor nirkabel dan 1 controller utama</p>
+
+  <table class="cover-info">
+    <tr><td>Versi dokumen</td><td>1.0 — gabungan PRD v0.1 dan lampiran teknis</td></tr>
+    <tr><td>Tanggal</td><td>19 Oktober 2026</td></tr>
+    <tr><td>Penyusun</td><td>AViSha Inovasi Indonesia</td></tr>
+    <tr><td>Status</td><td>Draft — spesifikasi teknis menunggu persetujuan pemesan</td></tr>
+    <tr><td>Referensi</td><td>Invoice #113 tanggal 2 Oktober 2026; percakapan 14–19 Oktober 2026</td></tr>
+  </table>
+
+  <p class="cover-foot">Dokumen ini bukan alat diagnosis medis dan tidak menggantikan tenaga kesehatan.</p>
+</section>
+
+<section role="body" data-page-restart="1">
+
+<h2>1. Ringkasan Eksekutif</h2>
+
+<p class="lead">Proyek ini membangun prototipe sistem pemantauan parameter fisiologis yang terdiri dari
+<b>empat unit alat fisik</b>: tiga node sensor nirkabel dan satu controller utama. Setiap node membaca
+satu parameter, mengirimkannya lewat ESP-NOW, dan controller memvalidasi, mengklasifikasi, menampilkan
+status di OLED, serta memutar panduan suara melalui DFPlayer.</p>
+
+<p class="lead">Tiga hal membedakan dokumen ini dari sekadar daftar komponen. Pertama, sistem dirancang
+dengan prinsip <b>kegagalan aman</b>: data yang hilang atau tidak valid tidak pernah ditampilkan sebagai
+kondisi normal. Kedua, ambang keputusan diberi label sebagai <b>usulan yang disertai rujukan</b>, bukan
+angka final — keputusan klinis tetap milik pemesan. Ketiga, dokumen ini memisahkan dengan tegas antara
+<b>rancangan</b> dan <b>hasil pengujian</b>; tidak ada angka kinerja yang diklaim sebelum diukur.</p>
+
+<table>
+  <tr><th style="width:32%">Aspek</th><th>Ringkasan</th></tr>
+  <tr><td>Jumlah unit</td><td>4 — Node 1 (ECG), Node 2 (SpO2/HR), Node 3 (suhu), Controller</td></tr>
+  <tr><td>Komunikasi</td><td>ESP-NOW 2,4 GHz, 1 paket per detik per node, timeout 3 detik</td></tr>
+  <tr><td>Keluaran</td><td>OLED 128×64, DFPlayer + speaker (13 track audio), LED indikator</td></tr>
+  <tr><td>Status sistem</td><td>TERPUTUS &gt; TIDAK VALID &gt; GAWAT &gt; PERHATIAN &gt; NORMAL</td></tr>
+  <tr><td>Firmware</td><td>2 build — satu firmware node (di-flash 3×) dan satu firmware controller</td></tr>
+  <tr><td>Yang belum final</td><td>Sumber daya 4 unit, ambang keputusan, isi panduan first aid</td></tr>
+</table>
+
+<h2>2. Ruang Lingkup</h2>
+
+<h3>2.1 Empat unit alat</h3>
+
+<p>Invoice menyebut tiga unit ESP32 Sensor Node dan satu ESP32 Controller Utama. Karena itu sistem
+dihitung sebagai empat alat, masing-masing dengan MCU, catu daya, dan casing sendiri.</p>
+
+<table>
+  <tr><th style="width:17%">Unit</th><th style="width:20%">Peran</th><th style="width:28%">Sensor / aktuator</th><th>Catu daya</th></tr>
+  <tr><td><b>Alat 1</b> — Node 1</td><td>Akuisisi ECG</td><td>AD8232 + 3 elektroda</td><td>Charging/power node 1</td></tr>
+  <tr><td><b>Alat 2</b> — Node 2</td><td>Akuisisi SpO2/HR</td><td>MAX30102</td><td>Charging/power node 2</td></tr>
+  <tr><td><b>Alat 3</b> — Node 3</td><td>Akuisisi suhu</td><td>DS18B20</td><td>Charging/power node 3</td></tr>
+  <tr><td><b>Alat 4</b> — Controller</td><td>Penerima, tampilan, audio, log</td><td>OLED, DFPlayer, microSD, speaker, tombol, LED</td><td>Power Box Utama</td></tr>
+</table>
+
+<p>Konsekuensi yang perlu dihitung sejak awal: empat catu daya terpisah harus siap sebelum uji integrasi;
+controller harus mengenali tiga MAC node; dan ada empat box (3 box node + 1 box utama), meski ketiga
+box node dapat memakai satu desain yang sama.</p>
+
+<h3>2.2 Termasuk dalam lingkup</h3>
+<ul>
+  <li>Perancangan sistem wireless 3 node dan box utama, termasuk integrasi komunikasi.</li>
+  <li>Pemrograman ESP32 sensor node dan controller utama.</li>
+  <li>Integrasi sensor, LCD/OLED, dan sistem suara.</li>
+  <li>Decision logic dan panduan first aid.</li>
+  <li>Perakitan, testing, debugging, dan penyempurnaan prototipe.</li>
+  <li>Desain dan 3D print box utama serta box node sensor.</li>
+</ul>
+
+<h3>2.3 Belum ditetapkan</h3>
+<p>Pembagian sensor ke node, protokol wireless, format payload, ambang batas, logika klasifikasi,
+detail panduan first aid, desain mekanik final, durasi baterai, dan kriteria pengujian numerik.</p>
+
+<h2>3. Arsitektur Sistem</h2>
+
+<img width="586" src="images/blok.png" alt="Diagram blok sistem">
+<p class="cap">Gambar 1 — Tiga node sensor mengirim ke satu controller; controller menggerakkan empat keluaran.</p>
+
+<p>Setiap node hanya membawa satu sensor agar kegagalan satu sensor tidak menjatuhkan node lain. Controller
+menjadi satu-satunya titik yang mengetahui status keseluruhan, sehingga logika keputusan tidak tersebar dan
+mudah diaudit saat penulisan paper.</p>
+
+<h2>4. Cara Kerja Sistem</h2>
+
+<ol>
+  <li><b>Node membaca sensor</b> satu kali per detik, lalu memvalidasi secara lokal: elektroda menempel atau
+      lepas, jari ada di sensor atau tidak, CRC suhu benar, dan nilai berada dalam rentang teknis.</li>
+  <li><b>Node mengirim paket</b> berisi identitas node, nomor urut, waktu, nilai sensor, dan satu flag
+      validitas — lewat ESP-NOW, satu paket per detik.</li>
+  <li><b>Controller memeriksa kesegaran data.</b> Tidak ada paket selama tiga detik berarti node ditandai
+      TERPUTUS, dan nilai terakhirnya tidak dipakai sebagai data terkini.</li>
+  <li><b>Controller mengklasifikasi.</b> Hanya data dengan flag valid = 1 yang diklasifikasi, lalu digabung
+      menjadi satu status sistem.</li>
+  <li><b>Controller menampilkan dan berbunyi.</b> Status ditampilkan di OLED; bila memicu audio, DFPlayer
+      memutar track yang sesuai.</li>
+  <li><b>Controller mencatat.</b> Setiap perubahan status dicatat sebagai bahan penulisan paper.</li>
+</ol>
+
+<h3>4.1 Prioritas status</h3>
+<p>Urutan dari yang paling tinggi: <b>TERPUTUS &gt; TIDAK VALID &gt; GAWAT &gt; PERHATIAN &gt; NORMAL</b>.
+Artinya, kehilangan data tidak boleh menutupi kondisi bahaya, dan kondisi bahaya tidak boleh menyamarkan
+bahwa ada node yang mati. Bila Node 1 terputus sementara Node 2 menunjukkan kondisi gawat, layar
+menampilkan keduanya, tetapi audio yang diputar adalah audio gawat.</p>
+
+<h2>5. Kebutuhan Fungsional</h2>
+
+<table>
+  <tr><th style="width:9%">ID</th><th style="width:34%">Kebutuhan</th><th>Kriteria penerimaan awal</th></tr>
+  <tr><td>FR-01</td><td>Node membaca sensor terpasang</td><td>Pembacaan tersedia di firmware dan dapat diperiksa saat pengujian</td></tr>
+  <tr><td>FR-02</td><td>Node mengirim data nirkabel</td><td>Controller menerima paket dari node terdaftar</td></tr>
+  <tr><td>FR-03</td><td>Controller mengenali sumber data</td><td>Setiap paket membawa identitas node</td></tr>
+  <tr><td>FR-04</td><td>Controller memvalidasi data</td><td>Data hilang atau di luar rentang ditandai dan tidak dipakai untuk keputusan</td></tr>
+  <tr><td>FR-05</td><td>Controller menampilkan data</td><td>Nilai, identitas node, dan status tampil di OLED</td></tr>
+  <tr><td>FR-06</td><td>Controller menjalankan aturan keputusan</td><td>Hanya aturan yang disetujui dan terdokumentasi yang berjalan</td></tr>
+  <tr><td>FR-07</td><td>Sistem memutar audio</td><td>Audio terpetakan ke kondisi terkonfirmasi diputar lewat DFPlayer</td></tr>
+  <tr><td>FR-08</td><td>Sistem menandai gangguan</td><td>Kegagalan sensor atau komunikasi terlihat jelas</td></tr>
+  <tr><td>FR-09</td><td>Sistem menyediakan data pengujian</td><td>Cara pencatatan ditentukan sebelum pengujian</td></tr>
+  <tr><td>FR-10</td><td>Sistem menampilkan panduan first aid</td><td>Konten ditinjau dan disetujui sebelum dipakai</td></tr>
+</table>
+
+<h3>5.1 Kebutuhan nonfungsional</h3>
+<ul>
+  <li><b>Keandalan data:</b> setiap nilai dikaitkan dengan node sumber dan status validitasnya.</li>
+  <li><b>Kegagalan aman:</b> data tidak tersedia tidak boleh tampil sebagai kondisi normal.</li>
+  <li><b>Keterlacakan:</b> aturan keputusan, versi firmware, dan hasil pengujian dicatat.</li>
+  <li><b>Keterbacaan:</b> informasi penting terbaca pada OLED 128×64.</li>
+  <li><b>Batas penggunaan:</b> prototipe tidak boleh dipresentasikan sebagai alat diagnosis medis.</li>
+</ul>
+
+<h2 class="pb">6. Aturan Keputusan</h2>
+
+<p class="lead">Ambang fisiologis belum ditentukan oleh sumber proyek. Angka di bawah adalah <b>usulan</b>
+yang disertai rujukan umum untuk <b>dewasa saat istirahat</b> — bukan protokol klinis, dan tidak berlaku
+untuk anak, bayi, atau ibu hamil. Semua baris harus disetujui pemesan sebelum implementasi.</p>
+
+<h3>6.1 Aturan validitas — dijalankan sebelum klasifikasi</h3>
+
+<table>
+  <tr><th style="width:16%">Sensor</th><th>Syarat data dianggap valid</th><th style="width:28%">Kalau gagal</th></tr>
+  <tr><td>AD8232</td><td>LO+ dan LO− tidak HIGH selama 1 detik</td><td>q=0, error E1 — elektroda lepas</td></tr>
+  <tr><td>MAX30102</td><td>Jari terdeteksi, amplitudo PPG cukup, HR 30–220 bpm stabil 5 detik</td><td>q=0, error E2 — sinyal PPG buruk</td></tr>
+  <tr><td>DS18B20</td><td>CRC cocok, nilai 30,0–43,0 °C</td><td>q=0, error E3 — suhu tidak terbaca</td></tr>
+  <tr><td>Semua</td><td>Nilai bukan NaN dan tidak di luar rentang teknis</td><td>q=0, error E9</td></tr>
+</table>
+
+<h3>6.2 Keputusan per parameter</h3>
+
+<table>
+  <tr><th style="width:9%">Param</th><th style="width:9%">Satuan</th><th style="width:14%">Kondisi IF</th><th style="width:22%">Status</th><th style="width:14%">Tampilan</th><th style="width:7%">Audio</th><th>Rujukan</th></tr>
+  <tr><td>HR</td><td>bpm</td><td>&lt; 50</td><td><b>BRADIKARDIA BERAT</b></td><td>HR 45 !!!</td><td>A-03</td><td>AHA — bradikardia &lt; 60</td></tr>
+  <tr><td>HR</td><td>bpm</td><td>50 – 59</td><td>BRADIKARDIA</td><td>HR 55 !</td><td>A-02</td><td>AHA — bradikardia &lt; 60</td></tr>
+  <tr><td>HR</td><td>bpm</td><td>60 – 100</td><td>NORMAL</td><td>HR 78</td><td>—</td><td>AHA — 60–100 bpm</td></tr>
+  <tr><td>HR</td><td>bpm</td><td>101 – 120</td><td>TAKIKARDIA</td><td>HR 112 !</td><td>A-02</td><td>AHA — takikardia &gt; 100</td></tr>
+  <tr><td>HR</td><td>bpm</td><td>&gt; 120</td><td><b>TAKIKARDIA BERAT</b></td><td>HR 134 !!!</td><td>A-03</td><td>AHA — takikardia &gt; 100</td></tr>
+  <tr><td>SpO2</td><td>%</td><td>≥ 95</td><td>NORMAL</td><td>SpO2 97%</td><td>—</td><td>WHO — ≥ 95% normal</td></tr>
+  <tr><td>SpO2</td><td>%</td><td>91 – 94</td><td>HIPOKSIA RINGAN</td><td>SpO2 93% !</td><td>A-04</td><td>WHO — di bawah normal</td></tr>
+  <tr><td>SpO2</td><td>%</td><td>86 – 90</td><td><b>HIPOKSIA SEDANG</b></td><td>SpO2 88% !!!</td><td>A-05</td><td>WHO — ≤ 90% hipoksemia</td></tr>
+  <tr><td>SpO2</td><td>%</td><td>≤ 85</td><td><b>HIPOKSIA BERAT</b></td><td>SpO2 83% !!!</td><td>A-05</td><td>WHO — hipoksemia berat</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>&lt; 35,0</td><td><b>HIPOTERMIA BERAT</b></td><td>T 34.2 !!!</td><td>A-07</td><td>Hipotermia berat &lt; 35 °C</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>35,0 – 35,9</td><td>HIPOTERMIA</td><td>T 35.6 !</td><td>A-06</td><td>Hipotermia &lt; 36 °C (aksila)</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>36,0 – 37,4</td><td>NORMAL</td><td>T 36.6</td><td>—</td><td>Aksila normal 36,0–37,4</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>37,5 – 37,9</td><td>DEMAM RINGAN</td><td>T 37.7 !</td><td>A-08</td><td>Demam ≥ 37,5 °C (aksila)</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>38,0 – 39,4</td><td>DEMAM</td><td>T 38.6 !</td><td>A-08</td><td>Demam ≥ 38,0 °C</td></tr>
+  <tr><td>Suhu</td><td>°C</td><td>≥ 39,5</td><td><b>DEMAM TINGGI</b></td><td>T 39.8 !!!</td><td>A-09</td><td>Demam tinggi ≥ 39,5 °C</td></tr>
+  <tr><td>ECG</td><td>—</td><td>LO+/LO− HIGH &gt; 1 s</td><td>ELEKTRODA LEPAS</td><td>ECG: LEPAS</td><td>A-10</td><td>Datasheet AD8232</td></tr>
+  <tr><td>ECG</td><td>bpm</td><td>selisih HR &gt; 15 selama 5 s</td><td>HR TIDAK KONSISTEN</td><td>HR: CEK SENSOR</td><td>A-11</td><td>Konsistensi dua metode</td></tr>
+  <tr><td>ECG</td><td>—</td><td>selain di atas</td><td>ECG TERBACA</td><td>ECG: OK</td><td>—</td><td>Tanpa interpretasi irama</td></tr>
+  <tr><td>Komunikasi</td><td>—</td><td>tidak ada paket &gt; 3 s</td><td><b>NODE TERPUTUS</b></td><td>N1: TERPUTUS</td><td>A-12</td><td>Batas desain sistem</td></tr>
+  <tr><td>Sistem</td><td>—</td><td>hanya 1 dari 3 node aktif &gt; 10 s</td><td>SISTEM TIDAK LENGKAP</td><td>1/3 NODE</td><td>A-13</td><td>Batas desain sistem</td></tr>
+</table>
+
+<p class="warn">&nbsp;&nbsp;<b>Soal ECG.</b> Sistem ini tidak menginterpretasi irama jantung. Satu lead tidak
+cukup untuk itu, dan klaim aritmia tidak boleh muncul di paper. Yang dilaporkan hanya status elektroda,
+HR turunan, dan konsistensi HR terhadap PPG.</p>
+
+<h3>6.3 Histeresis dan debounce</h3>
+<p>Ambang angka saja tidak cukup — nilai yang berayun di batas akan membuat status berkedip dan audio
+berbunyi berulang. Karena itu: perubahan status hanya berlaku bila kondisi bertahan minimal tiga detik
+berturut-turut; keluar dari status gawat memerlukan margin dua satuan; dan nilai yang hilang tidak dihitung
+sebagai normal, melainkan dibekukan dan diberi tanda garis ganda.</p>
+
+<h2 class="pb">7. Flowchart</h2>
+
+<img width="586" src="images/flowchart.png" alt="Flowchart sistem">
+<p class="cap">Gambar 2 — Alur node dan controller, termasuk jalur elektroda lepas, timeout, dan jalur status.</p>
+
+<p>Dua hal yang mudah terlewat saat membaca diagram ini. Pertama, cabang "tidak valid" tetap mengirim paket —
+node tidak diam, ia melaporkan bahwa dirinya tidak valid, sehingga controller bisa membedakan antara
+"sensor rusak" dan "node mati". Kedua, semua cabang status bertemu kembali sebelum tahap tampilan, sehingga
+layar selalu menampilkan keadaan terbaru, bukan keadaan terakhir yang kebetulan normal.</p>
+
+<h2>8. Peta Audio</h2>
+
+<p>Berkas disimpan di folder <code>mp3/</code> pada microSD dengan nama empat digit, MP3 mono 128 kbps
+44,1 kHz. DFPlayer membaca urutan nama berkas, bukan isi folder.</p>
+
+<table>
+  <tr><th style="width:9%">Kode</th><th style="width:14%">Berkas</th><th>Isi suara</th><th style="width:12%">Prioritas</th></tr>
+  <tr><td>A-01</td><td>0001.mp3</td><td>Sistem siap. Semua sensor terhubung.</td><td>1</td></tr>
+  <tr><td>A-02</td><td>0002.mp3</td><td>Perhatian. Detak jantung tidak normal.</td><td>2</td></tr>
+  <tr><td>A-03</td><td>0003.mp3</td><td>Peringatan. Detak jantung sangat tidak normal. Segera cari bantuan.</td><td><b>4</b></td></tr>
+  <tr><td>A-04</td><td>0004.mp3</td><td>Perhatian. Kadar oksigen sedikit rendah.</td><td>2</td></tr>
+  <tr><td>A-05</td><td>0005.mp3</td><td>Peringatan. Kadar oksigen rendah. Segera cari bantuan.</td><td><b>4</b></td></tr>
+  <tr><td>A-06</td><td>0006.mp3</td><td>Perhatian. Suhu tubuh rendah.</td><td>2</td></tr>
+  <tr><td>A-07</td><td>0007.mp3</td><td>Peringatan. Suhu tubuh sangat rendah. Segera cari bantuan.</td><td><b>4</b></td></tr>
+  <tr><td>A-08</td><td>0008.mp3</td><td>Perhatian. Suhu tubuh meningkat.</td><td>2</td></tr>
+  <tr><td>A-09</td><td>0009.mp3</td><td>Peringatan. Suhu tubuh tinggi. Segera cari bantuan.</td><td><b>4</b></td></tr>
+  <tr><td>A-10</td><td>0010.mp3</td><td>Elektroda terlepas. Periksa pemasangan elektroda.</td><td>3</td></tr>
+  <tr><td>A-11</td><td>0011.mp3</td><td>Pembacaan detak jantung tidak konsisten. Periksa sensor.</td><td>3</td></tr>
+  <tr><td>A-12</td><td>0012.mp3</td><td>Node tidak terhubung. Periksa daya node.</td><td>3</td></tr>
+  <tr><td>A-13</td><td>0013.mp3</td><td>Sistem tidak lengkap. Sebagian node tidak aktif.</td><td>3</td></tr>
+</table>
+
+<p><b>Aturan pemutaran:</b> hanya satu track pada satu waktu; audio gawat tidak boleh dipotong oleh
+prioritas lebih rendah; kondisi yang sama tidak diulang sebelum 30 detik; maksimal tiga kali pengulangan
+per kondisi, setelah itu senyap sampai kondisi berubah.</p>
+
+<h2 class="pb">9. Wiring</h2>
+
+<p class="lead">Tabel di bawah adalah acuan pemasangan. Semua pin pada ESP32 diambil dari sisi yang sama
+agar kabel tidak menyilang di dalam box.</p>
+
+<table>
+  <tr><th style="width:12%">Unit</th><th style="width:16%">Pin ESP32</th><th style="width:18%">Pin modul</th><th>Fungsi</th></tr>
+  <tr><td rowspan="5"><b>Node 1</b></td><td>3V3</td><td>3.3V</td><td>Catu daya modul</td></tr>
+  <tr><td>GND</td><td>GND</td><td>Ground bersama</td></tr>
+  <tr><td>GPIO 34</td><td>OUTPUT</td><td>Sinyal ECG — ADC1, input only</td></tr>
+  <tr><td>GPIO 35</td><td>LO+</td><td>Deteksi elektroda lepas</td></tr>
+  <tr><td>GPIO 32</td><td>LO−</td><td>Deteksi elektroda lepas</td></tr>
+  <tr><td rowspan="5"><b>Node 2</b></td><td>3V3</td><td>VIN</td><td>Catu daya modul</td></tr>
+  <tr><td>GND</td><td>GND</td><td>Ground bersama</td></tr>
+  <tr><td>GPIO 21</td><td>SDA</td><td>I2C data</td></tr>
+  <tr><td>GPIO 22</td><td>SCL</td><td>I2C clock</td></tr>
+  <tr><td>GPIO 27</td><td>INT</td><td>Interrupt — opsional</td></tr>
+  <tr><td rowspan="3"><b>Node 3</b></td><td>3V3</td><td>VDD</td><td>Catu daya</td></tr>
+  <tr><td>GPIO 4</td><td>DQ</td><td>1-Wire + pull-up 4,7 kΩ ke 3V3</td></tr>
+  <tr><td>GND</td><td>GND</td><td>Ground bersama</td></tr>
+  <tr><td rowspan="4"><b>Controller</b></td><td>3V3</td><td>OLED VCC</td><td>Catu daya layar</td></tr>
+  <tr><td>GPIO 21</td><td>OLED SDA</td><td>I2C data</td></tr>
+  <tr><td>GPIO 22</td><td>OLED SCL</td><td>I2C clock</td></tr>
+  <tr><td>5V</td><td>DFPlayer VCC</td><td>5V, bukan 3,3V — amplifier butuh 5V</td></tr>
+</table>
+
+<h3>9.1 Node 1 — AD8232</h3>
+<img width="586" src="images/wiring-node1.png" alt="Wiring Node 1 AD8232">
+<p class="cap">Gambar 3 — Node 1. Elektroda RA, LA, RL lewat kabel 3,5 mm ke modul; pin SDN disambung ke 3V3.</p>
+
+<h3>9.2 Node 2 — MAX30102</h3>
+<img width="586" src="images/wiring-node2.png" alt="Wiring Node 2 MAX30102">
+<p class="cap">Gambar 4 — Node 2. Sensor ditekan ke jari, bukan sekadar disentuh.</p>
+
+<h3>9.3 Node 3 — DS18B20</h3>
+<img width="586" src="images/wiring-node3.png" alt="Wiring Node 3 DS18B20">
+<p class="cap">Gambar 5 — Node 3. Pull-up 4,7 kΩ dari DQ ke 3V3 wajib; tanpa itu sensor tidak terbaca.</p>
+
+<h3>9.4 Controller — OLED, DFPlayer, panel</h3>
+<img width="586" src="images/wiring-oled.png" alt="Wiring OLED">
+<p class="cap">Gambar 6 — OLED SSD1306, alamat I2C umumnya 0x3C.</p>
+
+<img width="586" src="images/wiring-dfplayer.png" alt="Wiring DFPlayer">
+<p class="cap">Gambar 7 — DFPlayer. SPK1 dan SPK2 ke speaker 4 Ω 3 W; jangan menyambung speaker ke GND.</p>
+
+<img width="586" src="images/wiring-panel.png" alt="Wiring tombol dan LED">
+<p class="cap">Gambar 8 — Panel depan. Tombol memakai pull-up internal, LED memakai resistor 220 Ω.</p>
+
+<h2 class="pb">10. Catu Daya</h2>
+
+<p class="lead">Bagian ini belum diputuskan. Invoice menyebut unit charging/power <b>tanpa baterai</b>.
+Tanpa keputusan sumber daya, keempat alat belum bisa menyala bersamaan dan uji integrasi belum bisa dimulai.</p>
+
+<img width="586" src="images/daya-node.png" alt="Topologi daya node">
+<p class="cap">Gambar 9 — Node: satu rail 3,3 V untuk semua beban.</p>
+
+<img width="586" src="images/daya-controller.png" alt="Topologi daya controller">
+<p class="cap">Gambar 10 — Controller: DFPlayer mengambil 5 V langsung dari sumber, bukan dari regulator 3,3 V.</p>
+
+<table>
+  <tr><th style="width:22%">Opsi</th><th>Kelebihan</th><th>Kekurangan</th><th style="width:18%">Cocok untuk</th></tr>
+  <tr><td><b>A.</b> Power bank USB 5 V per unit</td><td>Cepat, murah, tidak perlu solder</td><td>Kabel USB keluar dari box; belum sepenuhnya nirkabel</td><td>Prototipe dan uji cepat</td></tr>
+  <tr><td><b>B.</b> 18650 + TP4056 + boost 5 V</td><td>Benar-benar portabel, bisa diisi ulang</td><td>Butuh ruang, perlu proteksi, perakitan lebih lama</td><td>Alat final</td></tr>
+  <tr><td><b>C.</b> Adaptor 5 V DC</td><td>Paling stabil untuk pengujian lama</td><td>Tidak portabel</td><td>Uji laboratorium</td></tr>
+</table>
+
+<p>Rekomendasi: opsi A untuk prototipe dan uji integrasi, opsi B untuk versi yang dipamerkan. Casing
+menyediakan lubang USB sehingga keduanya bisa dipakai tanpa mengubah desain.</p>
+
+<h2 class="pb">11. Casing</h2>
+
+<p class="lead">Dimensi di bawah adalah usulan, bukan hasil ukur. Ukur modul yang benar-benar dibeli sebelum
+mencetak — modul AD8232 dan MAX30102 yang beredar punya ukuran dan urutan pin berbeda antar penjual.</p>
+
+<h3>11.1 Casing node — 80 × 50 × 33 mm</h3>
+
+<img width="586" src="images/casing-node.png" alt="Casing node tiga tampak">
+<p class="cap">Gambar 11 — Casing node, tiga tampak. Tebal dinding 2,5 mm.</p>
+
+<table>
+  <tr><th style="width:20%">Bukaan</th><th style="width:18%">Dimensi</th><th style="width:24%">Posisi</th><th>Keterangan</th></tr>
+  <tr><td>USB</td><td>10 × 4 mm</td><td>Tengah bawah</td><td>Akses flash firmware</td></tr>
+  <tr><td>LED status</td><td>Ø 5 mm</td><td>Kanan atas</td><td>Satu LED per node</td></tr>
+  <tr><td>Gland kabel</td><td>Ø 8 mm</td><td>Kiri tengah</td><td>Node 1 kabel elektroda; Node 3 kabel probe</td></tr>
+  <tr><td>Vent</td><td>18 × 2 mm, 4 buah</td><td>Kiri atas</td><td>Pelepasan panas regulator</td></tr>
+  <tr><td>Boss sekrup</td><td>Ø 6 mm, 4 buah</td><td>Sudut, inset 5 mm</td><td>Sekrup M3 panjang 10 mm</td></tr>
+</table>
+
+<table>
+  <tr><th style="width:14%">Node</th><th style="width:34%">Bukaan yang berubah</th><th>Alasan</th></tr>
+  <tr><td><b>Node 1</b></td><td>Gland Ø8 di kiri</td><td>Kabel tiga elektroda keluar dari box</td></tr>
+  <tr><td><b>Node 2</b></td><td>Gland diganti jendela jari Ø16 di tutup atas; vent dipindah ke samping</td><td>Jari harus menekan sensor langsung, bukan menyentuh casing</td></tr>
+  <tr><td><b>Node 3</b></td><td>Gland Ø8 di kiri, vent dihapus</td><td>Probe DS18B20 berbentuk kabel</td></tr>
+</table>
+
+<p class="warn">&nbsp;&nbsp;<b>Node 2 butuh perhatian khusus.</b> MAX30102 harus kontak kulit langsung tanpa
+cahaya luar. Kalau jendela jari terlalu lebar atau sensor tertanam terlalu dalam, pembacaan akan gagal terus
+dan sistem menandainya q=0 — benar secara aturan, tetapi alat terlihat rusak.</p>
+
+<h3>11.2 Casing utama — 115 × 85 × 50 mm</h3>
+
+<img width="586" src="images/casing-utama.png" alt="Casing utama tiga tampak">
+<p class="cap">Gambar 12 — Casing utama, tiga tampak. Tebal dinding 2,5 mm.</p>
+
+<table>
+  <tr><th style="width:20%">Bukaan</th><th style="width:26%">Dimensi</th><th style="width:22%">Posisi</th><th>Keterangan</th></tr>
+  <tr><td>Jendela OLED</td><td>27 × 14 mm</td><td>Depan, tengah atas</td><td>Area aktif OLED 21,7 × 11,2 mm</td></tr>
+  <tr><td>Tombol</td><td>Ø 12 mm, 3 buah</td><td>Depan, bawah</td><td>Jarak antar pusat 16 mm</td></tr>
+  <tr><td>LED</td><td>Ø 5 mm, 2 buah</td><td>Depan, kanan bawah</td><td>Hijau normal, merah alarm</td></tr>
+  <tr><td>Saklar daya</td><td>13 × 7 mm</td><td>Depan, kiri bawah</td><td>Toggle SPDT</td></tr>
+  <tr><td>Gril speaker</td><td>Ø 44 mm, 5 slot 30 × 2,5 mm</td><td>Atas, tengah</td><td>Speaker 40 mm di bawahnya</td></tr>
+  <tr><td>Jack DC</td><td>Ø 9 mm</td><td>Samping, kiri atas</td><td>Input 5 V</td></tr>
+  <tr><td>USB</td><td>10 × 4 mm</td><td>Samping, tengah</td><td>Flash firmware</td></tr>
+  <tr><td>microSD</td><td>12 × 2 mm</td><td>Samping, bawah USB</td><td>Slot DFPlayer, harus bisa dicapai tanpa bongkar</td></tr>
+</table>
+
+<p>Slot microSD jangan ditutup. Kartu berisi 13 berkas audio dan akan sering diganti bila isi audio berubah.</p>
+
+<h2 class="pb">12. Rencana Pengujian</h2>
+
+<table>
+  <tr><th style="width:8%">ID</th><th style="width:26%">Pengujian</th><th>Bukti yang dikumpulkan</th></tr>
+  <tr><td>T-01</td><td>Pembacaan setiap sensor</td><td>Log pembacaan dan kondisi pengujian</td></tr>
+  <tr><td>T-02</td><td>Pengiriman dari setiap node</td><td>ID node, paket terkirim dan diterima, waktu</td></tr>
+  <tr><td>T-03</td><td>Node terputus</td><td>Waktu hingga controller menandai timeout</td></tr>
+  <tr><td>T-04</td><td>Data tidak valid</td><td>Bukti data ditandai dan tidak diklasifikasikan</td></tr>
+  <tr><td>T-05</td><td>Tampilan OLED</td><td>Foto atau video dan hasil verifikasi tampilan</td></tr>
+  <tr><td>T-06</td><td>Pemutaran audio</td><td>Kondisi pemicu dan audio yang keluar</td></tr>
+  <tr><td>T-07</td><td>Integrasi tiga node</td><td>Log penerimaan data dari seluruh node</td></tr>
+  <tr><td>T-08</td><td>Uji berulang</td><td>Jumlah percobaan, kegagalan, catatan</td></tr>
+  <tr><td>T-09</td><td>Casing dan perakitan</td><td>Foto prototipe dan daftar masalah mekanik</td></tr>
+  <tr><td>T-10</td><td>Akurasi HR</td><td>30 pasangan data terhadap oximeter komersial</td></tr>
+  <tr><td>T-11</td><td>Akurasi SpO2</td><td>30 pasangan data terhadap pulse oximeter</td></tr>
+  <tr><td>T-12</td><td>Akurasi suhu</td><td>20 pasangan data terhadap termometer digital</td></tr>
+  <tr><td>T-13</td><td>Deteksi elektroda lepas</td><td>Lepas-pasang 10 kali, jumlah terdeteksi</td></tr>
+  <tr><td>T-14</td><td>Latensi end-to-end</td><td>Rata-rata dan maksimum dalam milidetik</td></tr>
+  <tr><td>T-15</td><td>Jarak jangkau ESP-NOW</td><td>Uji per 5 meter sampai gagal</td></tr>
+</table>
+
+<p>Nilai hasil, tingkat keberhasilan, latensi, atau akurasi baru boleh diisi setelah pengujian aktual.
+Catat juga jumlah subjek, kondisi ruangan, dan waktu pengujian — tanpa itu hasilnya tidak bisa diulang.</p>
+
+<h2>13. Prioritas Pengerjaan</h2>
+
+<h3>P0 — harus lebih dulu</h3>
+<ol>
+  <li>Konfirmasi spesifikasi inti dengan pemesan: alokasi sensor per node, parameter dan satuan, keluaran yang diharapkan, protokol wireless.</li>
+  <li>Finalkan diagram blok dan flowchart berdasarkan arsitektur yang disepakati.</li>
+  <li>Finalkan tabel keputusan if-else beserta sumber rujukan.</li>
+  <li>Buat desain koneksi dan pinout setelah board dan modul aktual dikonfirmasi.</li>
+  <li>Siapkan bagian metode paper, terpisah dari hasil pengujian.</li>
+</ol>
+
+<h3>P1 — setelah spesifikasi disetujui</h3>
+<ol>
+  <li>Implementasi pembacaan sensor pada tiap node.</li>
+  <li>Implementasi identitas node dan komunikasi wireless.</li>
+  <li>Implementasi penerimaan data, validasi, timeout, dan tampilan controller.</li>
+  <li>Implementasi audio dan aturan keputusan yang disetujui.</li>
+  <li>Pengujian unit tiap modul.</li>
+</ol>
+
+<h3>P2 — integrasi dan penyelesaian</h3>
+<ol>
+  <li>Integrasi tiga node dengan controller.</li>
+  <li>Uji kondisi normal, data tidak valid, dan komunikasi terputus.</li>
+  <li>Selesaikan casing dan perakitan.</li>
+  <li>Dokumentasikan hasil pengujian aktual, foto alat, keterbatasan, dan kesimpulan.</li>
+</ol>
+
+<h2>14. Risiko dan Mitigasi</h2>
+
+<table>
+  <tr><th style="width:36%">Risiko</th><th>Mitigasi</th></tr>
+  <tr><td>Pembagian sensor per node belum jelas</td><td>Buat tabel alokasi dan minta persetujuan sebelum wiring</td></tr>
+  <tr><td>Ambang keputusan belum disepakati</td><td>Jangan mengarang ambang; gunakan rujukan yang disetujui dan dokumentasikan</td></tr>
+  <tr><td>Wireless putus atau paket hilang</td><td>Timeout, ID node, nomor urut, timestamp, dan status gangguan</td></tr>
+  <tr><td>Sensor menghasilkan pembacaan buruk</td><td>Validasi kualitas data sebelum klasifikasi</td></tr>
+  <tr><td>Paper membutuhkan hasil sebelum alat selesai</td><td>Tulis metode dan rancangan lebih dulu; isi hasil hanya dari eksperimen nyata</td></tr>
+  <tr><td>Catu daya belum lengkap</td><td>Catat bahwa komponen power tidak termasuk baterai dan konfirmasi kebutuhan daya</td></tr>
+  <tr><td>Risiko listrik pada elektroda</td><td>Modul AD8232 tidak terisolasi galvanis; gunakan adaptor berkualitas dan jangan menyentuh elektroda saat perangkat terhubung ke pengisi daya yang meragukan</td></tr>
+</table>
+
+<h2>15. Yang Harus Dikonfirmasi</h2>
+
+<ol>
+  <li><b>Alokasi sensor per node</b> — setujui usulan 1:1: Node 1 AD8232, Node 2 MAX30102, Node 3 DS18B20.</li>
+  <li><b>Sumber daya empat unit</b> — kabel, power bank, atau baterai terpisah? Ini menentukan klaim nirkabel dan kelayakan uji integrasi.</li>
+  <li><b>Ambang keputusan</b> — apakah tabel pada bagian 6 disetujui, atau ada angka dari pembimbing.</li>
+  <li><b>Subjek uji</b> — dewasa sehat atau ada skenario pasien; mempengaruhi etika dan klaim.</li>
+  <li><b>Bahasa dan isi audio</b> — draf pada bagian 8 disetujui?</li>
+  <li><b>Isi panduan first aid</b> — siapa yang menyusun dan menyetujui, serta ditampilkan di OLED atau dokumen terpisah.</li>
+  <li><b>Tiga node identik atau berbeda</b> — satu desain PCB untuk ketiga node jauh lebih murah dan cepat dirakit.</li>
+</ol>
+
+<h2>16. Definisi Selesai</h2>
+
+<ul>
+  <li>Tiga node dapat diidentifikasi dan mengirim data ke controller.</li>
+  <li>Data sensor dapat divalidasi dan ditampilkan.</li>
+  <li>Status komunikasi dan data tidak valid ditangani sesuai aturan.</li>
+  <li>Aturan keputusan yang disepakati berjalan pada skenario uji.</li>
+  <li>Keluaran audio berfungsi untuk pemicu yang ditentukan.</li>
+  <li>Rangkaian, casing, dan catu daya terdokumentasi.</li>
+  <li>Pengujian integrasi dicatat dan dapat ditelusuri.</li>
+  <li>Dokumen paper membedakan desain, metode, dan hasil pengujian aktual.</li>
+</ul>
+
+<h2 class="pb">Lampiran A — Format Data</h2>
+
+<p>Struct biner untuk ESP-NOW, sekitar 40 byte:</p>
+
+<table>
+  <tr><th style="width:22%">Field</th><th style="width:16%">Tipe</th><th>Keterangan</th></tr>
+  <tr><td>node_id</td><td>uint8</td><td>1 sampai 3</td></tr>
+  <tr><td>seq</td><td>uint16</td><td>Naik terus, untuk mendeteksi paket hilang</td></tr>
+  <tr><td>t_ms</td><td>uint32</td><td>millis() node saat membaca</td></tr>
+  <tr><td>q</td><td>uint8</td><td>1 valid, 0 tidak valid</td></tr>
+  <tr><td>err</td><td>uint8</td><td>0 ok, 1 elektroda, 2 PPG, 3 suhu, 9 umum</td></tr>
+  <tr><td>hr</td><td>int16</td><td>bpm, −1 bila tidak ada</td></tr>
+  <tr><td>spo2</td><td>uint8</td><td>persen, 0 bila tidak ada</td></tr>
+  <tr><td>temp_x10</td><td>int16</td><td>°C dikali 10, −1 bila tidak ada</td></tr>
+  <tr><td>vbat_mv</td><td>uint16</td><td>Tegangan suplai dalam milivolt</td></tr>
+</table>
+
+<p>Versi JSON hanya dipakai untuk log dan paper, bukan untuk lalu lintas ESP-NOW.</p>
+
+<h2>Lampiran B — Pinout Usulan</h2>
+
+<p>Batasan yang wajib dipatuhi: GPIO 34–39 hanya bisa jadi input; ADC yang bisa dipakai saat WiFi/ESP-NOW
+aktif hanya ADC1 (GPIO 32–39); hindari GPIO 6–11 karena dipakai flash internal; GPIO 0, 2, 12, dan 15 adalah
+strapping pin sehingga tidak cocok untuk tombol yang ditekan saat boot.</p>
+
+<table>
+  <tr><th style="width:26%">Perangkat</th><th style="width:22%">Pin ESP32</th><th>Keterangan</th></tr>
+  <tr><td>OLED SDA / SCL</td><td>GPIO 21 / 22</td><td>I2C, alamat 0x3C</td></tr>
+  <tr><td>DFPlayer RX</td><td>GPIO 17</td><td>Lewat resistor 1 kΩ seri</td></tr>
+  <tr><td>DFPlayer TX</td><td>GPIO 16</td><td>RX2 controller</td></tr>
+  <tr><td>Tombol OK / Next / Mute</td><td>GPIO 25 / 26 / 33</td><td>INPUT_PULLUP</td></tr>
+  <tr><td>LED status / alarm</td><td>GPIO 2 / 5</td><td>Lewat resistor 220 Ω</td></tr>
+</table>
+
+<h2>Lampiran C — Rujukan</h2>
+
+<ul>
+  <li>American Heart Association — <i>Adult Basic and Advanced Life Support</i>, rentang denyut jantung dewasa saat istirahat.</li>
+  <li>World Health Organization — <i>Pulse Oximetry Training Manual</i>, interpretasi SpO2 dan batas hipoksemia.</li>
+  <li>World Health Organization — <i>Integrated Management of Childhood Illness</i>, definisi demam.</li>
+  <li>Analog Devices — <i>AD8232 Heart Rate Monitor Front End</i> datasheet, pin LO+/LO−.</li>
+  <li>Maxim Integrated — <i>MAX30102 Pulse Oximeter and Heart-Rate Sensor</i> datasheet.</li>
+  <li>Maxim Integrated — <i>DS18B20 Programmable Resolution 1-Wire Digital Thermometer</i> datasheet.</li>
+  <li>Espressif — <i>ESP-NOW User Guide</i>, batas payload dan karakteristik kanal.</li>
+</ul>
+
+<p>Nomor halaman dan edisi dokumen rujukan perlu dicocokkan ulang saat penulisan paper. Sitasi di atas
+menyebut dokumen, bukan kutipan verbatim.</p>
+
+</section>
+</body>
+</html>

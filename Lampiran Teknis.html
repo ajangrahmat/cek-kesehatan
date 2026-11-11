@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lampiran Teknis — Aturan Keputusan, Flowchart, dan Desain</title>
+<style>
+  :root{
+    --ink:#0f172a; --ink-2:#334155; --ink-3:#64748b;
+    --line:#e2e8f0; --line-2:#cbd5e1;
+    --bg:#ffffff; --soft:#f8fafc;
+    --blue:#3b82f6; --amber:#f59e0b; --red:#ef4444; --orange:#ea580c;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{
+    margin:0; padding:48px 32px 80px;
+    background:#eef2f6; color:var(--ink);
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    font-size:15px; line-height:1.65;
+  }
+  .page{
+    max-width:1000px; margin:0 auto; background:var(--bg);
+    padding:56px 64px 72px; border-radius:6px;
+    box-shadow:0 1px 2px rgba(15,23,42,.06),0 12px 32px rgba(15,23,42,.08);
+  }
+  header.doc{border-bottom:3px solid var(--ink); padding-bottom:22px; margin-bottom:36px;}
+  .kicker{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); font-weight:700;}
+  h1{font-size:29px; line-height:1.25; margin:10px 0 14px; letter-spacing:-.02em;}
+  .meta{font-size:13px; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:6px 22px;}
+  .meta b{color:var(--ink-2); font-weight:600;}
+  h2{
+    font-size:19px; margin:52px 0 16px; padding-bottom:9px;
+    border-bottom:1px solid var(--line); letter-spacing:-.01em;
+  }
+  h2 .num{color:var(--ink-3); font-weight:600; margin-right:10px;}
+  h3{font-size:15px; margin:28px 0 10px; color:var(--ink-2); letter-spacing:.01em;}
+  p{margin:0 0 14px; color:var(--ink-2);}
+  .note{
+    background:#fffbeb; border-left:4px solid var(--amber);
+    padding:16px 20px; margin:24px 0; border-radius:0 4px 4px 0;
+    font-size:13.5px; color:#78350f;
+  }
+  .note b{color:#92400e;}
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{
+    background:var(--soft); text-align:left; padding:10px 11px;
+    border-bottom:2px solid var(--line-2); font-weight:700; color:var(--ink);
+    font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+  }
+  td{padding:9px 11px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+  tr:last-child td{border-bottom:1px solid var(--line-2);}
+  td code, p code, li code{
+    background:#f1f5f9; padding:1px 5px; border-radius:3px;
+    font-family:"Cascadia Mono",Consolas,monospace; font-size:12px; color:#0f172a;
+  }
+  .tag{display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:700; letter-spacing:.03em; white-space:nowrap;}
+  .t-gawat{background:#fee2e2; color:#b91c1c;}
+  .t-warn{background:#fef3c7; color:#92400e;}
+  .t-ok{background:#dcfce7; color:#15803d;}
+  .t-err{background:#e2e8f0; color:#334155;}
+  ol,ul{margin:0 0 16px; padding-left:22px; color:var(--ink-2);}
+  li{margin-bottom:7px;}
+  .diagram{
+    background:var(--soft); border:1px solid var(--line); border-radius:6px;
+    padding:20px; margin:22px 0 10px;
+  }
+  .diagram svg{display:block; width:100%; height:auto;}
+  .cap{font-size:12px; color:var(--ink-3); text-align:center; margin:0 0 26px;}
+  pre{
+    background:#0f172a; color:#e2e8f0; padding:18px 20px; border-radius:5px;
+    overflow-x:auto; font-size:12.5px; line-height:1.6; margin:16px 0 24px;
+    font-family:"Cascadia Mono",Consolas,monospace;
+  }
+  pre .c{color:#7dd3fc;}
+  .flow{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 24px;}
+  .flow .chip{
+    background:var(--soft); border:1px solid var(--line-2); border-radius:4px;
+    padding:6px 12px; font-size:12px; font-weight:600; color:var(--ink-2);
+  }
+  .flow .arw{color:var(--ink-3); align-self:center; font-size:13px;}
+  .kv{display:grid; grid-template-columns:180px 1fr; gap:2px 18px; font-size:13.5px; margin:14px 0 22px;}
+  .kv dt{color:var(--ink-3); font-weight:600;}
+  .kv dd{margin:0; color:var(--ink-2);}
+  footer.doc{margin-top:56px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-3);}
+  @media print{
+    body{background:#fff; padding:0; font-size:10.5pt;}
+    .page{box-shadow:none; padding:0; max-width:none; border-radius:0;}
+    h2{page-break-after:avoid;}
+    table,.diagram,pre{page-break-inside:avoid;}
+    .pagebreak{page-break-before:always;}
+  }
+  @media(max-width:700px){
+    body{padding:20px 12px 48px;}
+    .page{padding:28px 20px 40px;}
+    h1{font-size:23px;}
+    table{font-size:11.5px;}
+    th,td{padding:7px 6px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc">
+  <div class="kicker">Lampiran Teknis · PRD v0.1</div>
+  <h1>Sistem Monitoring Parameter Fisiologis Berbasis ESP32</h1>
+  <div class="meta">
+    <span><b>Tanggal</b> 19 Oktober 2026</span>
+    <span><b>Penyusun</b> AViSha Inovasi Indonesia</span>
+    <span><b>Status</b> Usulan — butuh persetujuan</span>
+    <span><b>Melengkapi</b> PRD v0.1</span>
+  </div>
+</header>
+
+<div class="note">
+  <b>Batas dokumen.</b> Semua angka di sini adalah <b>usulan</b> yang disertai rujukan
+  umum — bukan protokol klinis, bukan hasil pengujian, dan bukan alat diagnosis.
+  Ambang berlaku untuk <b>dewasa saat istirahat</b>, tidak untuk anak, bayi, atau
+  ibu hamil.
+</div>
+
+<h2><span class="num">1</span>Cara Kerja Sistem</h2>
+
+<p>Sistem terdiri dari <b>4 unit alat</b>: tiga node sensor dan satu controller.
+Enam langkah berikut berulang selama alat menyala:</p>
+
+<ol>
+  <li><b>Node membaca sensor.</b> Tiap node punya satu sensor, membaca 1× per detik,
+      lalu memvalidasi secara lokal: elektroda menempel atau lepas, jari ada atau
+      tidak, CRC suhu benar, nilai masuk rentang teknis.</li>
+  <li><b>Node mengirim paket.</b> Berisi identitas node, nomor urut, waktu, nilai
+      sensor, dan satu flag validitas — lewat ESP-NOW, 1× per detik.</li>
+  <li><b>Controller memeriksa kesegaran data.</b> Tidak ada paket selama 3 detik
+      berarti node ditandai <b>TERPUTUS</b>, dan nilai terakhirnya tidak dipakai
+      sebagai data terkini.</li>
+  <li><b>Controller mengklasifikasi.</b> Hanya data dengan flag valid = 1 yang
+      diklasifikasi, lalu digabung menjadi satu status sistem.</li>
+  <li><b>Controller menampilkan dan berbunyi.</b> Status ke OLED; bila memicu
+      audio, DFPlayer memutar track yang sesuai.</li>
+  <li><b>Controller mencatat.</b> Setiap perubahan status dicatat sebagai bahan paper.</li>
+</ol>
+
+<h3>Prioritas status sistem</h3>
+<div class="flow">
+  <span class="chip" style="background:#fee2e2;border-color:#fca5a5;color:#b91c1c;">TERPUTUS</span>
+  <span class="arw">&gt;</span>
+  <span class="chip" style="background:#e2e8f0;border-color:#cbd5e1;">TIDAK VALID</span>
+  <span class="arw">&gt;</span>
+  <span class="chip" style="background:#ffedd5;border-color:#fdba74;color:#9a3412;">GAWAT</span>
+  <span class="arw">&gt;</span>
+  <span class="chip" style="background:#fef3c7;border-color:#fcd34d;color:#92400e;">PERHATIAN</span>
+  <span class="arw">&gt;</span>
+  <span class="chip" style="background:#dcfce7;border-color:#86efac;color:#15803d;">NORMAL</span>
+</div>
+<p style="font-size:13.5px;">Kehilangan data tidak boleh menutupi kondisi bahaya, dan
+kondisi bahaya tidak boleh menyamarkan bahwa ada node yang mati.</p>
+
+<h2><span class="num">2</span>Keputusan Teknis yang Diusulkan</h2>
+
+<h3>2.1 Daftar alat — 4 unit</h3>
+<p>Sistem ini terdiri dari <b>4 unit alat fisik</b>, bukan 3. Tiga node sensor dan
+satu controller — masing-masing punya ESP32, catu daya, dan casing sendiri.</p>
+<table>
+  <thead><tr><th style="width:145px">Unit</th><th style="width:145px">Peran</th><th style="width:70px">MCU</th><th>Sensor / aktuator</th><th style="width:172px">Catu daya</th><th style="width:90px">Casing</th></tr></thead>
+  <tbody>
+    <tr><td><b>Alat 1</b> — Node 1</td><td>Akuisisi ECG</td><td>ESP32</td><td>AD8232 + 3 elektroda</td><td>Charging/power node 1</td><td>Box node</td></tr>
+    <tr><td><b>Alat 2</b> — Node 2</td><td>Akuisisi SpO2/HR</td><td>ESP32</td><td>MAX30102</td><td>Charging/power node 2</td><td>Box node</td></tr>
+    <tr><td><b>Alat 3</b> — Node 3</td><td>Akuisisi suhu</td><td>ESP32</td><td>DS18B20</td><td>Charging/power node 3</td><td>Box node</td></tr>
+    <tr><td><b>Alat 4</b> — Controller</td><td>Penerima, tampilan, audio, log</td><td>ESP32</td><td>OLED, DFPlayer + microSD + speaker, tombol, LED</td><td>Power Box Utama</td><td>Box utama</td></tr>
+  </tbody>
+</table>
+<p><b>Konsekuensi yang perlu dihitung sejak awal:</b></p>
+<ul>
+  <li><b>Firmware tetap dua build, bukan empat.</b> Satu firmware node di-flash tiga
+      kali dengan <code>NODE_ID</code> berbeda (1, 2, 3), plus satu firmware controller.</li>
+  <li><b>Empat catu daya terpisah</b> harus siap sebelum uji integrasi. Invoice hanya
+      menyebut unit charging/power tanpa baterai — keempat alat belum bisa dinyalakan
+      bersamaan sampai sumber dayanya diputuskan.</li>
+  <li><b>Controller harus mengenali tiga MAC node.</b> Usulan: tabel MAC di firmware,
+      dengan tombol pairing untuk mendaftarkan node baru tanpa kompilasi ulang.</li>
+  <li><b>Empat box, bukan dua.</b> 3 box node + 1 box utama. Kalau ketiga node
+      memakai desain yang sama, cukup satu file 3D yang dicetak tiga kali — ini juga
+      alasan pertanyaan nomor 7 di bagian 10.</li>
+</ul>
+
+<h3>2.2 Alokasi sensor ke node</h3>
+<table>
+  <thead><tr><th style="width:80px">Node</th><th style="width:120px">Sensor</th><th>Parameter yang dikirim</th><th style="width:190px">Catatan</th></tr></thead>
+  <tbody>
+    <tr><td><b>Node 1</b></td><td>AD8232</td><td>Status elektroda, HR turunan (R-peak), amplitudo puncak</td><td>3 elektroda: RA, LA, RL</td></tr>
+    <tr><td><b>Node 2</b></td><td>MAX30102</td><td>HR, SpO2, status jari</td><td>I2C, butuh kontak stabil</td></tr>
+    <tr><td><b>Node 3</b></td><td>DS18B20</td><td>Suhu (°C), status CRC</td><td>Probe aksila / permukaan</td></tr>
+  </tbody>
+</table>
+<p style="font-size:13.5px;">Pemetaan 1:1 paling wajar dari invoice (3 sensor, 3 node).
+Kalau node ketiga ingin dijadikan cadangan, cukup dikosongkan — firmware controller
+tidak berubah.</p>
+
+<h3>2.3 Yang dikirim: nilai turunan, bukan waveform ECG</h3>
+<p><b>Usulan:</b> kirim HR, SpO2, suhu, dan status validitas — bukan waveform ECG mentah.</p>
+<ul>
+  <li>OLED 128×64 tidak mungkin menampilkan trace ECG yang berguna.</li>
+  <li>Waveform 250 Hz × 3 node tidak muat nyaman di satu kanal ESP-NOW.</li>
+  <li>Untuk paper, angka + tren + tabel status sudah cukup kuat; waveform menambah
+      klaim yang tidak bisa dipertanggungjawabkan tanpa validasi.</li>
+</ul>
+<p style="font-size:13.5px;">Bila tetap diperlukan, waveform dikirim sebagai
+<i>burst</i> 500 sampel hanya saat tombol ditekan (P2), bukan streaming terus-menerus.</p>
+
+<h3>2.4 Protokol dan laju data</h3>
+<table>
+  <thead><tr><th style="width:150px">Item</th><th style="width:250px">Usulan</th><th>Alasan</th></tr></thead>
+  <tbody>
+    <tr><td>Protokol</td><td>ESP-NOW</td><td>Tanpa router, latensi rendah, cocok 3 node</td></tr>
+    <tr><td>Laju kirim</td><td>1 paket/detik per node</td><td>Cukup untuk parameter vital, payload kecil</td></tr>
+    <tr><td>Timeout</td><td>3 detik (3 paket hilang)</td><td>Toleran terhadap 1–2 paket hilang</td></tr>
+    <tr><td>Ukuran payload</td><td>± 40 byte (struct biner)</td><td>Jauh di bawah batas 250 byte ESP-NOW</td></tr>
+    <tr><td>Kanal</td><td>2,4 GHz kanal 1 (seragam)</td><td>Menghindari node tidak saling menemukan</td></tr>
+  </tbody>
+</table>
+
+<h2 class="pagebreak"><span class="num">3</span>Tabel Aturan Keputusan</h2>
+
+<h3>3.1 Aturan validitas — dijalankan sebelum klasifikasi</h3>
+<table>
+  <thead><tr><th style="width:120px">Sensor</th><th>Syarat data dianggap VALID</th><th style="width:250px">Kalau gagal</th></tr></thead>
+  <tbody>
+    <tr><td>AD8232</td><td><code>LO+</code> dan <code>LO−</code> tidak HIGH selama 1 detik</td><td><code>q=0</code>, error <code>E1</code> — elektroda lepas</td></tr>
+    <tr><td>MAX30102</td><td>Jari terdeteksi, amplitudo PPG cukup, HR 30–220 bpm stabil 5 detik</td><td><code>q=0</code>, error <code>E2</code> — sinyal PPG buruk</td></tr>
+    <tr><td>DS18B20</td><td>CRC cocok, nilai 30,0–43,0 °C</td><td><code>q=0</code>, error <code>E3</code> — suhu tidak terbaca</td></tr>
+    <tr><td>Semua</td><td>Nilai tidak <code>NaN</code> dan tidak di luar rentang teknis</td><td><code>q=0</code>, error <code>E9</code></td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Keputusan per parameter</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="width:70px">Param</th><th style="width:52px">Satuan</th><th style="width:105px">Kondisi IF</th>
+      <th style="width:145px">Status</th><th style="width:110px">Tampilan</th>
+      <th style="width:60px">Audio</th><th>Rujukan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>HR</td><td>bpm</td><td><code>&lt; 50</code></td><td><span class="tag t-gawat">BRADIKARDIA BERAT</span></td><td><code>HR 45 !!!</code></td><td>A-03</td><td>AHA — bradikardia &lt; 60</td></tr>
+    <tr><td>HR</td><td>bpm</td><td><code>50 – 59</code></td><td><span class="tag t-warn">BRADIKARDIA</span></td><td><code>HR 55 !</code></td><td>A-02</td><td>AHA — bradikardia &lt; 60</td></tr>
+    <tr><td>HR</td><td>bpm</td><td><code>60 – 100</code></td><td><span class="tag t-ok">NORMAL</span></td><td><code>HR 78</code></td><td>—</td><td>AHA — 60–100 bpm</td></tr>
+    <tr><td>HR</td><td>bpm</td><td><code>101 – 120</code></td><td><span class="tag t-warn">TAKIKARDIA</span></td><td><code>HR 112 !</code></td><td>A-02</td><td>AHA — takikardia &gt; 100</td></tr>
+    <tr><td>HR</td><td>bpm</td><td><code>&gt; 120</code></td><td><span class="tag t-gawat">TAKIKARDIA BERAT</span></td><td><code>HR 134 !!!</code></td><td>A-03</td><td>AHA — takikardia &gt; 100</td></tr>
+    <tr><td>SpO2</td><td>%</td><td><code>≥ 95</code></td><td><span class="tag t-ok">NORMAL</span></td><td><code>SpO2 97%</code></td><td>—</td><td>WHO — ≥ 95% normal</td></tr>
+    <tr><td>SpO2</td><td>%</td><td><code>91 – 94</code></td><td><span class="tag t-warn">HIPOKSIA RINGAN</span></td><td><code>SpO2 93% !</code></td><td>A-04</td><td>WHO — di bawah normal</td></tr>
+    <tr><td>SpO2</td><td>%</td><td><code>86 – 90</code></td><td><span class="tag t-gawat">HIPOKSIA SEDANG</span></td><td><code>SpO2 88% !!!</code></td><td>A-05</td><td>WHO — ≤ 90% hipoksemia</td></tr>
+    <tr><td>SpO2</td><td>%</td><td><code>≤ 85</code></td><td><span class="tag t-gawat">HIPOKSIA BERAT</span></td><td><code>SpO2 83% !!!</code></td><td>A-05</td><td>WHO — hipoksemia berat</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>&lt; 35,0</code></td><td><span class="tag t-gawat">HIPOTERMIA BERAT</span></td><td><code>T 34.2 !!!</code></td><td>A-07</td><td>Hipotermia berat &lt; 35 °C</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>35,0 – 35,9</code></td><td><span class="tag t-warn">HIPOTERMIA</span></td><td><code>T 35.6 !</code></td><td>A-06</td><td>Hipotermia &lt; 36 °C (aksila)</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>36,0 – 37,4</code></td><td><span class="tag t-ok">NORMAL</span></td><td><code>T 36.6</code></td><td>—</td><td>Aksila normal 36,0–37,4</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>37,5 – 37,9</code></td><td><span class="tag t-warn">DEMAM RINGAN</span></td><td><code>T 37.7 !</code></td><td>A-08</td><td>Demam ≥ 37,5 °C (aksila)</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>38,0 – 39,4</code></td><td><span class="tag t-warn">DEMAM</span></td><td><code>T 38.6 !</code></td><td>A-08</td><td>Demam ≥ 38,0 °C</td></tr>
+    <tr><td>Suhu</td><td>°C</td><td><code>≥ 39,5</code></td><td><span class="tag t-gawat">DEMAM TINGGI</span></td><td><code>T 39.8 !!!</code></td><td>A-09</td><td>Demam tinggi ≥ 39,5 °C</td></tr>
+    <tr><td>ECG</td><td>—</td><td><code>LO+</code>/<code>LO−</code> HIGH &gt; 1 s</td><td><span class="tag t-err">ELEKTRODA LEPAS</span></td><td><code>ECG: LEPAS</code></td><td>A-10</td><td>Datasheet AD8232</td></tr>
+    <tr><td>ECG</td><td>bpm</td><td>selisih HR &gt; 15 selama 5 s</td><td><span class="tag t-warn">HR TIDAK KONSISTEN</span></td><td><code>HR: CEK SENSOR</code></td><td>A-11</td><td>Konsistensi dua metode</td></tr>
+    <tr><td>ECG</td><td>—</td><td>selain di atas</td><td><span class="tag t-ok">ECG TERBACA</span></td><td><code>ECG: OK</code></td><td>—</td><td>Tanpa interpretasi irama</td></tr>
+    <tr><td>Kom.</td><td>—</td><td>tidak ada paket &gt; 3 s</td><td><span class="tag t-gawat">NODE TERPUTUS</span></td><td><code>N1: TERPUTUS</code></td><td>A-12</td><td>Batas desain sistem</td></tr>
+    <tr><td>Sistem</td><td>—</td><td>hanya 1 dari 3 node aktif &gt; 10 s</td><td><span class="tag t-warn">SISTEM TIDAK LENGKAP</span></td><td><code>1/3 NODE</code></td><td>A-13</td><td>Batas desain sistem</td></tr>
+  </tbody>
+</table>
+
+<div class="note" style="background:#fef2f2;border-color:#ef4444;color:#7f1d1d;">
+  <b>Soal ECG.</b> Sistem ini <b>tidak</b> menginterpretasi irama jantung. Satu lead
+  tidak cukup untuk itu, dan klaim aritmia tidak boleh muncul di paper. Yang
+  dilaporkan hanya: elektroda terpasang/lepas, HR turunan, dan konsistensi HR
+  terhadap PPG.
+</div>
+
+<h3>3.3 Histeresis dan debounce</h3>
+<p>Ambang angka saja tidak cukup — nilai yang berayun di batas akan membuat status
+berkedip dan audio berbunyi berulang.</p>
+<ul>
+  <li>Perubahan status hanya berlaku bila kondisi bertahan <b>≥ 3 detik</b> berturut-turut.</li>
+  <li>Keluar dari GAWAT butuh melewati ambang sebesar <b>margin 2 satuan</b>
+      (mis. HR harus turun di bawah 118 sebelum TAKIKARDIA BERAT dilepas).</li>
+  <li>Nilai yang hilang <b>tidak</b> dihitung sebagai normal — dibekukan dan diberi tanda <code>--</code>.</li>
+</ul>
+
+<h2 class="pagebreak"><span class="num">4</span>Flowchart</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 1100 1300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .bx{fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.5;}
+      .dm{fill:#fffbeb;stroke:#f59e0b;stroke-width:1.5;}
+      .er{fill:#fef2f2;stroke:#ef4444;stroke-width:1.5;}
+      .au{fill:#fff7ed;stroke:#ea580c;stroke-width:1.5;}
+      .st{fill:#eff6ff;stroke:#3b82f6;stroke-width:1.8;}
+      .ln{stroke:#475569;stroke-width:1.6;fill:none;}
+      .lnd{stroke:#94a3b8;stroke-width:1.4;fill:none;stroke-dasharray:5 4;}
+      .tx{fill:#0f172a;font-size:13px;text-anchor:middle;}
+      .txs{fill:#334155;font-size:13px;text-anchor:middle;}
+      .lb{fill:#64748b;font-size:11.5px;text-anchor:middle;font-style:italic;}
+      .zone{fill:none;stroke:#e2e8f0;stroke-width:1.2;stroke-dasharray:8 6;}
+      .zt{fill:#94a3b8;font-size:11px;letter-spacing:.1em;}
+    </style>
+  </defs>
+
+  <!-- zone labels -->
+  <rect class="zone" x="14" y="14" width="1072" height="1268" rx="10"/>
+  <text class="zt" x="34" y="44" font-weight="700">ALUR SISTEM</text>
+
+  <!-- A -->
+  <rect class="st" x="390" y="30" width="320" height="52" rx="26"/>
+  <text class="tx" x="550" y="62">Mulai — inisialisasi node &amp; controller</text>
+
+  <!-- B -->
+  <rect class="bx" x="390" y="112" width="320" height="52" rx="5"/>
+  <text class="tx" x="550" y="143">Node membaca sensor lokal · 1 Hz</text>
+
+  <!-- C -->
+  <rect class="bx" x="390" y="194" width="320" height="64" rx="5"/>
+  <text class="tx" x="550" y="220">Validasi lokal: elektroda, jari,</text>
+  <text class="tx" x="550" y="240">CRC, rentang teknis</text>
+
+  <!-- D1 -->
+  <polygon class="dm" points="550,288 650,326 550,364 450,326"/>
+  <text class="txs" x="550" y="331">Data valid?</text>
+
+  <!-- S1 -->
+  <rect class="er" x="70" y="298" width="270" height="56" rx="5"/>
+  <text class="tx" x="205" y="331">Tandai q=0 + kode error</text>
+
+  <!-- E -->
+  <rect class="bx" x="390" y="394" width="320" height="60" rx="5"/>
+  <text class="tx" x="550" y="418">Kirim paket ESP-NOW</text>
+  <text class="txs" x="550" y="438" font-size="12">n, seq, t, nilai, q</text>
+
+  <!-- D2 -->
+  <polygon class="dm" points="550,484 650,522 550,560 450,522"/>
+  <text class="txs" x="550" y="518">Paket diterima</text>
+  <text class="txs" x="550" y="534">&lt; 3 detik?</text>
+
+  <!-- S2 -->
+  <rect class="er" x="70" y="494" width="270" height="56" rx="5"/>
+  <text class="tx" x="205" y="527">STATUS: NODE TERPUTUS</text>
+
+  <!-- D3 -->
+  <polygon class="dm" points="550,590 650,628 550,666 450,628"/>
+  <text class="txs" x="550" y="633">q = 1 ?</text>
+
+  <!-- S3 -->
+  <rect class="er" x="70" y="600" width="270" height="56" rx="5"/>
+  <text class="tx" x="205" y="633">STATUS: DATA TIDAK VALID</text>
+
+  <!-- H -->
+  <rect class="bx" x="390" y="696" width="320" height="68" rx="5"/>
+  <text class="tx" x="550" y="722">Klasifikasi per parameter</text>
+  <text class="txs" x="550" y="742" font-size="12">→ status agregat</text>
+
+  <!-- D4 -->
+  <polygon class="dm" points="550,794 650,832 550,870 450,832"/>
+  <text class="txs" x="550" y="837">Status GAWAT?</text>
+
+  <!-- S4 -->
+  <rect class="au" x="70" y="804" width="270" height="56" rx="5"/>
+  <text class="tx" x="205" y="830">Putar audio GAWAT</text>
+  <text class="txs" x="205" y="848" font-size="12">prioritas tertinggi</text>
+
+  <!-- D5 -->
+  <polygon class="dm" points="550,900 650,938 550,976 450,938"/>
+  <text class="txs" x="550" y="934">Status</text>
+  <text class="txs" x="550" y="950">PERHATIAN?</text>
+
+  <!-- S5 -->
+  <rect class="au" x="70" y="910" width="270" height="56" rx="5"/>
+  <text class="tx" x="205" y="943">Putar audio PERHATIAN</text>
+
+  <!-- K -->
+  <rect class="bx" x="390" y="1006" width="320" height="60" rx="5"/>
+  <text class="tx" x="550" y="1032">Render OLED + catat log</text>
+  <text class="txs" x="550" y="1051" font-size="12">Serial / microSD</text>
+
+  <!-- D6 -->
+  <polygon class="dm" points="550,1096 650,1134 550,1172 450,1134"/>
+  <text class="txs" x="550" y="1139">Sistem aktif?</text>
+
+  <!-- M -->
+  <rect class="st" x="390" y="1202" width="320" height="52" rx="26"/>
+  <text class="tx" x="550" y="1234">Selesai</text>
+
+  <!-- main vertical arrows -->
+  <path class="ln" marker-end="url(#ar)" d="M550,82 V108"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,164 V190"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,258 V284"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,364 V390"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,454 V480"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,560 V586"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,666 V692"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,764 V790"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,870 V896"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,976 V1002"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,1066 V1092"/>
+  <path class="ln" marker-end="url(#ar)" d="M550,1172 V1198"/>
+
+  <!-- D1 tidak -> S1 -->
+  <path class="ln" marker-end="url(#ar)" d="M450,326 H344"/>
+  <text class="lb" x="400" y="318">Tidak</text>
+  <!-- S1 -> E -->
+  <path class="ln" marker-end="url(#ar)" d="M205,354 V424 H386"/>
+
+  <!-- D2 tidak -> S2 -->
+  <path class="ln" marker-end="url(#ar)" d="M450,522 H344"/>
+  <text class="lb" x="400" y="514">Tidak</text>
+  <text class="lb" x="576" y="580">Ya</text>
+
+  <!-- D3 tidak -> S3 -->
+  <path class="ln" marker-end="url(#ar)" d="M450,628 H344"/>
+  <text class="lb" x="400" y="620">Tidak</text>
+  <text class="lb" x="576" y="686">Ya</text>
+
+  <!-- D4 ya -> S4 -->
+  <path class="ln" marker-end="url(#ar)" d="M450,832 H344"/>
+  <text class="lb" x="400" y="824">Ya</text>
+  <text class="lb" x="576" y="890">Tidak</text>
+
+  <!-- D5 ya -> S5 -->
+  <path class="ln" marker-end="url(#ar)" d="M450,938 H344"/>
+  <text class="lb" x="400" y="930">Ya</text>
+  <text class="lb" x="576" y="996">Tidak</text>
+
+  <!-- status rail -->
+  <path class="lnd" d="M40,522 V1036 H386"/>
+  <path class="ln" marker-end="url(#ar)" d="M40,1036 H386"/>
+  <path class="lnd" d="M70,522 H40"/>
+  <path class="lnd" d="M70,628 H40"/>
+  <path class="lnd" d="M70,832 H40"/>
+  <path class="lnd" d="M70,938 H40"/>
+  <text class="lb" x="26" y="780" transform="rotate(-90 26 780)">status → tampilan</text>
+
+  <!-- loop back -->
+  <path class="lnd" marker-end="url(#ar)" d="M650,1134 H1040 V138 H714"/>
+  <text class="lb" x="700" y="1124">Ya</text>
+  <text class="lb" x="576" y="1194">Tidak</text>
+</svg>
+</div>
+<p class="cap">Gambar 1 — Alur node dan controller. Kotak biru: proses. Belah ketupat: keputusan.
+Merah: data tidak dipakai. Oranye: keluaran audio.</p>
+
+<h2 class="pagebreak"><span class="num">5</span>Diagram Blok</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .nb{fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.5;}
+      .cb{fill:#eff6ff;stroke:#3b82f6;stroke-width:2;}
+      .ob{fill:#fff7ed;stroke:#ea580c;stroke-width:1.4;}
+      .l{stroke:#475569;stroke-width:1.5;fill:none;}
+      .ld{stroke:#94a3b8;stroke-width:1.5;fill:none;stroke-dasharray:5 4;}
+      .t{fill:#0f172a;font-size:13px;text-anchor:middle;}
+      .s{fill:#64748b;font-size:11px;text-anchor:middle;}
+    </style>
+  </defs>
+
+  <!-- nodes -->
+  <rect class="nb" x="20" y="50" width="170" height="76" rx="5"/>
+  <text class="t" x="105" y="80" font-weight="700">Alat 1 · Node 1</text>
+  <text class="s" x="105" y="101">AD8232 · ECG</text>
+
+  <rect class="nb" x="20" y="152" width="170" height="76" rx="5"/>
+  <text class="t" x="105" y="182" font-weight="700">Alat 2 · Node 2</text>
+  <text class="s" x="105" y="203">MAX30102 · SpO2/HR</text>
+
+  <rect class="nb" x="20" y="254" width="170" height="76" rx="5"/>
+  <text class="t" x="105" y="284" font-weight="700">Alat 3 · Node 3</text>
+  <text class="s" x="105" y="305">DS18B20 · Suhu</text>
+
+  <!-- wireless -->
+  <path class="ld" marker-end="url(#ar2)" d="M190,88 H336"/>
+  <path class="ld" marker-end="url(#ar2)" d="M190,190 H336"/>
+  <path class="ld" marker-end="url(#ar2)" d="M190,292 H336"/>
+  <text class="s" x="263" y="30">ESP-NOW · 2,4 GHz</text>
+  <text class="s" x="263" y="46">1 paket / detik</text>
+
+  <!-- controller -->
+  <rect class="cb" x="340" y="60" width="260" height="260" rx="6"/>
+  <text class="t" x="470" y="158" font-weight="700" font-size="15">Alat 4 · Controller</text>
+  <text class="s" x="470" y="180">validasi · timeout · klasifikasi</text>
+  <text class="s" x="470" y="198">status agregat · log</text>
+
+  <!-- bus -->
+  <path class="l" d="M600,190 H650"/>
+  <path class="l" d="M650,86 V302"/>
+  <path class="l" marker-end="url(#ar2)" d="M650,86 H696"/>
+  <path class="l" marker-end="url(#ar2)" d="M650,158 H696"/>
+  <path class="l" marker-end="url(#ar2)" d="M650,230 H696"/>
+  <path class="l" marker-end="url(#ar2)" d="M650,302 H696"/>
+
+  <!-- outputs -->
+  <rect class="ob" x="700" y="60" width="280" height="52" rx="5"/>
+  <text class="t" x="840" y="91">OLED 128×64</text>
+
+  <rect class="ob" x="700" y="132" width="280" height="52" rx="5"/>
+  <text class="t" x="840" y="163">DFPlayer + Speaker</text>
+
+  <rect class="ob" x="700" y="204" width="280" height="52" rx="5"/>
+  <text class="t" x="840" y="235">Tombol + LED</text>
+
+  <rect class="ob" x="700" y="276" width="280" height="52" rx="5"/>
+  <text class="t" x="840" y="307">Log Serial / microSD</text>
+</svg>
+</div>
+<p class="cap">Gambar 2 — Empat unit alat: tiga node sensor mengirim ke satu controller;
+controller menggerakkan empat keluaran.</p>
+
+<h2 class="pagebreak"><span class="num">6</span>Peta Audio (DFPlayer)</h2>
+
+<p>Berkas di folder <code>mp3/</code> pada microSD, nama 4 digit <code>0001.mp3</code> …
+<code>0013.mp3</code>, MP3 mono 128 kbps 44,1 kHz.</p>
+
+<table>
+  <thead><tr><th style="width:60px">Kode</th><th style="width:90px">Berkas</th><th>Isi suara</th><th style="width:90px">Prioritas</th></tr></thead>
+  <tbody>
+    <tr><td>A-01</td><td><code>0001.mp3</code></td><td>"Sistem siap. Semua sensor terhubung."</td><td>1</td></tr>
+    <tr><td>A-02</td><td><code>0002.mp3</code></td><td>"Perhatian. Detak jantung tidak normal."</td><td>2</td></tr>
+    <tr><td>A-03</td><td><code>0003.mp3</code></td><td>"Peringatan. Detak jantung sangat tidak normal. Segera cari bantuan."</td><td><b>4</b></td></tr>
+    <tr><td>A-04</td><td><code>0004.mp3</code></td><td>"Perhatian. Kadar oksigen sedikit rendah."</td><td>2</td></tr>
+    <tr><td>A-05</td><td><code>0005.mp3</code></td><td>"Peringatan. Kadar oksigen rendah. Segera cari bantuan."</td><td><b>4</b></td></tr>
+    <tr><td>A-06</td><td><code>0006.mp3</code></td><td>"Perhatian. Suhu tubuh rendah."</td><td>2</td></tr>
+    <tr><td>A-07</td><td><code>0007.mp3</code></td><td>"Peringatan. Suhu tubuh sangat rendah. Segera cari bantuan."</td><td><b>4</b></td></tr>
+    <tr><td>A-08</td><td><code>0008.mp3</code></td><td>"Perhatian. Suhu tubuh meningkat."</td><td>2</td></tr>
+    <tr><td>A-09</td><td><code>0009.mp3</code></td><td>"Peringatan. Suhu tubuh tinggi. Segera cari bantuan."</td><td><b>4</b></td></tr>
+    <tr><td>A-10</td><td><code>0010.mp3</code></td><td>"Elektroda terlepas. Periksa pemasangan elektroda."</td><td>3</td></tr>
+    <tr><td>A-11</td><td><code>0011.mp3</code></td><td>"Pembacaan detak jantung tidak konsisten. Periksa sensor."</td><td>3</td></tr>
+    <tr><td>A-12</td><td><code>0012.mp3</code></td><td>"Node tidak terhubung. Periksa daya node."</td><td>3</td></tr>
+    <tr><td>A-13</td><td><code>0013.mp3</code></td><td>"Sistem tidak lengkap. Sebagian node tidak aktif."</td><td>3</td></tr>
+  </tbody>
+</table>
+
+<h3>Aturan pemutaran</h3>
+<ol>
+  <li>Hanya satu track diputar pada satu waktu.</li>
+  <li>Audio gawat (prioritas 4) <b>tidak boleh dipotong</b> oleh prioritas lebih rendah.</li>
+  <li>Kondisi yang sama tidak diulang sebelum <b>30 detik</b> berlalu.</li>
+  <li>Maksimal <b>3 kali</b> pengulangan per kondisi; setelah itu senyap sampai kondisi berubah.</li>
+  <li>Kembali ke NORMAL tidak memicu audio kecuali sebelumnya ada kondisi gawat.</li>
+</ol>
+
+<h2 class="pagebreak"><span class="num">7</span>Pinout Usulan (ESP32 DevKit 30 pin)</h2>
+
+<div class="note">
+  <b>Jangan dipatenkan sebelum board dan modul fisik diperiksa.</b> Tabel ini usulan
+  berdasarkan batasan ESP32, bukan hasil verifikasi alat.
+</div>
+
+<p><b>Batasan yang wajib dipatuhi:</b></p>
+<ul>
+  <li>GPIO 34–39 <b>input saja</b>, tidak bisa jadi output.</li>
+  <li>ADC yang bisa dipakai saat WiFi/ESP-NOW aktif hanya <b>ADC1 (GPIO 32–39)</b>.</li>
+  <li>Hindari GPIO 6–11 (flash internal).</li>
+  <li>GPIO 0, 2, 12, 15 adalah strapping pin — jangan untuk tombol yang ditekan saat boot.</li>
+</ul>
+
+<h3>Node 1 — AD8232</h3>
+<table>
+  <thead><tr><th style="width:130px">AD8232</th><th style="width:130px">ESP32</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>3.3V</td><td>3V3</td><td>Jangan 5V</td></tr>
+    <tr><td>GND</td><td>GND</td><td>—</td></tr>
+    <tr><td>OUTPUT</td><td>GPIO 34</td><td>ADC1, input only</td></tr>
+    <tr><td>LO+</td><td>GPIO 35</td><td>Deteksi elektroda lepas</td></tr>
+    <tr><td>LO−</td><td>GPIO 32</td><td>Deteksi elektroda lepas</td></tr>
+    <tr><td>SDN</td><td>3V3</td><td>Selalu aktif</td></tr>
+  </tbody>
+</table>
+
+<h3>Node 2 — MAX30102</h3>
+<table>
+  <thead><tr><th style="width:130px">MAX30102</th><th style="width:130px">ESP32</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>VIN</td><td>3V3</td><td>Modul dengan regulator 1,8 V</td></tr>
+    <tr><td>GND</td><td>GND</td><td>—</td></tr>
+    <tr><td>SDA</td><td>GPIO 21</td><td>I2C default</td></tr>
+    <tr><td>SCL</td><td>GPIO 22</td><td>I2C default</td></tr>
+    <tr><td>INT</td><td>GPIO 27</td><td>Opsional, baca berbasis interrupt</td></tr>
+  </tbody>
+</table>
+
+<h3>Node 3 — DS18B20</h3>
+<table>
+  <thead><tr><th style="width:130px">DS18B20</th><th style="width:130px">ESP32</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>VDD</td><td>3V3</td><td>Mode parasit tidak dipakai</td></tr>
+    <tr><td>GND</td><td>GND</td><td>—</td></tr>
+    <tr><td>DQ</td><td>GPIO 4</td><td><b>Pull-up 4,7 kΩ ke 3V3 wajib</b></td></tr>
+  </tbody>
+</table>
+
+<h3>Controller</h3>
+<table>
+  <thead><tr><th style="width:180px">Perangkat</th><th style="width:130px">ESP32</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td>OLED SDA</td><td>GPIO 21</td><td>I2C</td></tr>
+    <tr><td>OLED SCL</td><td>GPIO 22</td><td>I2C</td></tr>
+    <tr><td>DFPlayer TX</td><td>GPIO 16</td><td>RX2 controller</td></tr>
+    <tr><td>DFPlayer RX</td><td>GPIO 17</td><td>TX2, lewat resistor 1 kΩ seri</td></tr>
+    <tr><td>Tombol OK</td><td>GPIO 25</td><td>INPUT_PULLUP</td></tr>
+    <tr><td>Tombol Next</td><td>GPIO 26</td><td>INPUT_PULLUP</td></tr>
+    <tr><td>Tombol Mute</td><td>GPIO 33</td><td>INPUT_PULLUP</td></tr>
+    <tr><td>LED status</td><td>GPIO 2</td><td>Hijau: normal</td></tr>
+    <tr><td>LED alarm</td><td>GPIO 5</td><td>Merah: gawat</td></tr>
+  </tbody>
+</table>
+
+<h2 class="pagebreak"><span class="num">8</span>Format Data</h2>
+
+<p>Struct biner untuk ESP-NOW (± 40 byte):</p>
+<pre><span class="c">// dikirim lewat ESP-NOW, bukan JSON</span>
+typedef struct __attribute__((packed)) {
+    uint8_t  node_id;    <span class="c">// 1..3</span>
+    uint16_t seq;        <span class="c">// naik terus, deteksi paket hilang</span>
+    uint32_t t_ms;       <span class="c">// millis() node saat baca</span>
+    uint8_t  q;          <span class="c">// 1 = valid, 0 = tidak valid</span>
+    uint8_t  err;        <span class="c">// 0=ok, 1=elektroda, 2=PPG, 3=suhu, 9=umum</span>
+    int16_t  hr;         <span class="c">// bpm, -1 = tidak ada</span>
+    uint8_t  spo2;       <span class="c">// %, 0 = tidak ada</span>
+    int16_t  temp_x10;   <span class="c">// °C x10, -1 = tidak ada</span>
+    uint16_t vbat_mv;    <span class="c">// tegangan suplai</span>
+} NodePacket;</pre>
+
+<p>Versi JSON hanya untuk log dan paper:</p>
+<pre>{"n":1,"seq":1234,"t":56789,"q":1,"err":0,"hr":78,"spo2":0,"temp":0,"vbat":4020}</pre>
+
+<h2><span class="num">9</span>Tambahan untuk Rencana Pengujian</h2>
+
+<p>PRD bagian 12 belum menyebut pembanding. Tanpa pembanding, tidak ada klaim akurasi
+yang boleh ditulis di paper.</p>
+
+<table>
+  <thead><tr><th style="width:60px">ID</th><th style="width:210px">Pengujian</th><th>Pembanding</th><th style="width:220px">Bukti</th></tr></thead>
+  <tbody>
+    <tr><td>T-10</td><td>Akurasi HR</td><td>Oximeter / HR meter komersial, 30 pasangan data</td><td>Tabel selisih, rata-rata, simpangan</td></tr>
+    <tr><td>T-11</td><td>Akurasi SpO2</td><td>Pulse oximeter komersial, 30 pasangan data</td><td>Tabel selisih</td></tr>
+    <tr><td>T-12</td><td>Akurasi suhu</td><td>Termometer digital, 20 pasangan data</td><td>Tabel selisih</td></tr>
+    <tr><td>T-13</td><td>Deteksi elektroda lepas</td><td>Lepas-pasang 10 kali</td><td>Jumlah terdeteksi / total</td></tr>
+    <tr><td>T-14</td><td>Latensi end-to-end</td><td>Timestamp node vs controller</td><td>Rata-rata dan maksimum (ms)</td></tr>
+    <tr><td>T-15</td><td>Jarak jangkau ESP-NOW</td><td>Uji per 5 m sampai gagal</td><td>Jarak maksimum stabil</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:13.5px;">Catat juga <b>jumlah subjek, kondisi ruangan, dan waktu
+pengujian</b> — tanpa itu hasilnya tidak bisa diulang.</p>
+
+<h2><span class="num">10</span>Yang Masih Harus Dikonfirmasi</h2>
+
+<p>Tujuh hal, urut dari yang paling menghambat:</p>
+
+<ol>
+  <li><b>Alokasi sensor per node</b> — setujui usulan 1:1?</li>
+  <li><b>Sumber daya 4 alat</b> — invoice menyebut tanpa baterai. Tiap unit disuplai
+      kabel, power bank, atau baterai terpisah? Ini menentukan klaim "wireless" dan
+      apakah keempat alat bisa menyala bersamaan saat uji integrasi.</li>
+  <li><b>Ambang di bagian 3.2</b> — disetujui, atau ada angka dari pembimbing?</li>
+  <li><b>Subjek uji</b> — dewasa sehat, atau ada skenario pasien? Mempengaruhi etika dan klaim.</li>
+  <li><b>Bahasa dan isi audio</b> — draf bagian 6 disetujui?</li>
+  <li><b>Isi panduan first aid</b> — siapa yang menyusun dan menyetujui? Ditampilkan di
+      OLED atau dokumen terpisah?</li>
+  <li><b>Tiga node identik atau berbeda?</b> Satu desain PCB yang sama untuk ketiga node
+      (hanya sensor yang diganti) jauh lebih murah dan lebih cepat dirakit daripada
+      tiga PCB berbeda. Ini mempengaruhi desain casing juga.</li>
+</ol>
+
+<h2><span class="num">11</span>Rujukan</h2>
+
+<ul style="font-size:13.5px;">
+  <li>American Heart Association — <i>Adult Basic and Advanced Life Support</i>,
+      rentang denyut jantung dewasa saat istirahat.</li>
+  <li>World Health Organization — <i>Pulse Oximetry Training Manual</i>, interpretasi
+      SpO2 dan batas hipoksemia.</li>
+  <li>World Health Organization — <i>Integrated Management of Childhood Illness</i>,
+      definisi demam.</li>
+  <li>Analog Devices — <i>AD8232 Heart Rate Monitor Front End</i> datasheet, pin LO+/LO−.</li>
+  <li>Maxim Integrated — <i>MAX30102 Pulse Oximeter and Heart-Rate Sensor</i> datasheet.</li>
+  <li>Maxim Integrated — <i>DS18B20 Programmable Resolution 1-Wire Digital Thermometer</i>
+      datasheet.</li>
+  <li>Espressif — <i>ESP-NOW User Guide</i>, batas payload dan karakteristik kanal.</li>
+</ul>
+
+<p style="font-size:12.5px;color:#64748b;">Nomor halaman dan edisi dokumen rujukan perlu
+dicocokkan ulang saat penulisan paper. Sitasi di atas menyebut dokumen, bukan kutipan
+verbatim.</p>
+
+<footer class="doc">
+  Lampiran Teknis — PRD Sistem Monitoring Parameter Fisiologis Berbasis ESP32 v0.1 ·
+  19 Oktober 2026 · AViSha Inovasi Indonesia
+</footer>
+
+</div>
+</body>
+</html>

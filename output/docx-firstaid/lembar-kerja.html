@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="docx-page-size" content="A4">
+<title>Lembar Kerja — Panduan First Aid dan Data yang Diperlukan</title>
+<style>
+:root{
+  --ff-heading: "Segoe UI", Arial, sans-serif;
+  --ff-body: "Segoe UI", Arial, sans-serif;
+  --fs-h1: 17pt;
+  --fs-h2: 12.5pt;
+  --fs-h3: 10.5pt;
+  --fs-body: 10pt;
+  --fs-small: 9pt;
+  --color-primary: #1f3a5f;
+  --color-accent: #b45309;
+  --color-text: #1e293b;
+  --color-muted: #64748b;
+  --color-border: #d5dde6;
+  --color-soft: #f4f7fa;
+  --spacing-paragraph: 6pt;
+  --page-content-width: 15.6cm;
+}
+@page { @bottom-center { content: counter(page) " / " counter(pages); } }
+body{
+  font-family: var(--ff-body);
+  font-size: var(--fs-body);
+  color: var(--color-text);
+  line-height: 1.5;
+  max-width: var(--page-content-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+p{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+   margin-top: 0; margin-bottom: var(--spacing-paragraph); text-align: justify; }
+h1{ font-family: var(--ff-heading); font-size: var(--fs-h1); color: var(--color-primary);
+    margin-top: 0; margin-bottom: 4pt; text-align: left; }
+h2{ font-family: var(--ff-heading); font-size: var(--fs-h2); color: var(--color-primary);
+    margin-top: 16pt; margin-bottom: 5pt; text-align: left;
+    border-bottom: 1px solid var(--color-border); padding-bottom: 3pt; }
+h3{ font-family: var(--ff-heading); font-size: var(--fs-h3); color: var(--color-text);
+    margin-top: 10pt; margin-bottom: 3pt; text-align: left; }
+ul, ol{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+        margin-top: 0; margin-bottom: var(--spacing-paragraph); }
+li{ font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+    margin-bottom: 3pt; text-align: justify; }
+table{ width: 100%; border-collapse: collapse; margin-top: 5pt; margin-bottom: 9pt;
+       font-family: var(--ff-body); font-size: var(--fs-small); }
+th{ background: var(--color-soft); color: var(--color-primary); font-family: var(--ff-heading);
+    font-size: var(--fs-small); font-weight: bold; text-align: left;
+    border: 1px solid var(--color-border); padding: 4pt 5pt; }
+td{ font-family: var(--ff-body); font-size: var(--fs-small); color: var(--color-text);
+    border: 1px solid var(--color-border); padding: 4pt 5pt; text-align: left; vertical-align: top; }
+.kicker{ font-family: var(--ff-heading); font-size: 8.5pt; color: var(--color-muted);
+         letter-spacing: 2pt; margin-bottom: 4pt; text-align: left; }
+.sub{ font-family: var(--ff-body); font-size: 10pt; color: var(--color-muted);
+      margin-bottom: 12pt; text-align: left; }
+.note{ border-left: 3px solid var(--color-accent); background: #fdf6ec;
+       padding: 6pt 8pt; margin-top: 6pt; margin-bottom: 9pt;
+       font-family: var(--ff-body); font-size: var(--fs-small); color: #6b3f0c; text-align: justify; }
+.box{ border: 1px solid var(--color-border); background: var(--color-soft);
+      padding: 7pt 9pt; margin-top: 6pt; margin-bottom: 9pt; }
+.box p{ font-family: var(--ff-body); font-size: var(--fs-small); color: var(--color-text); }
+.blank{ height: 16pt; }
+</style>
+</head>
+<body>
+
+<p class="kicker">LEMBAR KERJA · UNTUK PEMESAN</p>
+<h1>Panduan First Aid dan Data yang Diperlukan</h1>
+<p class="sub">Bahan konsultasi ke rumah sakit terdekat · 19 Oktober 2026</p>
+
+<table>
+  <tr><td style="width:26%"><b>Dari</b></td><td>AViSha Inovasi Indonesia</td></tr>
+  <tr><td><b>Untuk</b></td><td>Pemesan proyek</td></tr>
+  <tr><td><b>Tujuan</b></td><td>Mengumpulkan isi panduan first aid dan keputusan teknis yang masih terbuka</td></tr>
+  <tr><td><b>Cara pakai</b></td><td>Bagian 3 dan 4 dibawa ke rumah sakit. Bagian 5 sampai 7 diisi oleh pemesan.</td></tr>
+</table>
+
+<h2>1. Ringkas: apa yang kami butuhkan</h2>
+
+<p>Tiga hal, dan ketiganya tidak bisa kami kerjakan sendiri:</p>
+
+<ol>
+  <li><b>Isi panduan first aid</b> — kalimat yang diucapkan alat untuk tiap kondisi. Harus dari tenaga
+      kesehatan, bukan dari kami. Kami yang memasukkan ke firmware dan merekam audionya.</li>
+  <li><b>Ambang batas yang disetujui</b> — angka HR, SpO2, dan suhu. Usulan kami ada di dokumen PRD,
+      tetapi angka final sebaiknya ditetapkan rumah sakit.</li>
+  <li><b>Keputusan teknis yang menahan produksi</b> — terutama sumber daya empat unit alat.</li>
+</ol>
+
+<p>Format yang kami butuhkan sederhana: <b>kalimat siap ucap</b>, bukan paragraf penjelasan. Alat hanya
+bisa memutar rekaman pendek, dan tidak bisa menampilkan teks panjang.</p>
+
+<h2>2. Batasan alat — wajib disampaikan ke rumah sakit</h2>
+
+<div class="note">&nbsp;&nbsp;Bagian ini paling penting. Tanpa mengetahui batasannya, rumah sakit akan
+memberi instruksi yang tidak bisa dijalankan alat — misalnya instruksi CPR atau penilaian kesadaran.</div>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:34%">Batasan</th><th>Konsekuensi</th></tr>
+  <tr><td>1</td><td>Keluaran hanya suara dan layar kecil</td><td>Instruksi harus pendek, sekitar 10 detik per kalimat. Layar OLED hanya muat 3–4 baris.</td></tr>
+  <tr><td>2</td><td>Tidak bisa mendeteksi kesadaran</td><td>Alat tidak tahu apakah pengguna sadar atau tidak. Instruksi harus aman untuk kedua keadaan.</td></tr>
+  <tr><td>3</td><td>Tidak bisa mendeteksi henti jantung</td><td>Alat tidak boleh memberi instruksi CPR — salah satu pemicunya bisa elektroda lepas, bukan henti jantung.</td></tr>
+  <tr><td>4</td><td>Tidak menilai irama jantung</td><td>Satu lead tidak cukup. Yang dilaporkan hanya HR dan status elektroda.</td></tr>
+  <tr><td>5</td><td>Tidak terhubung layanan darurat</td><td>Alat tidak menelepon siapa pun. Instruksi harus menyuruh pengguna menghubungi bantuan sendiri.</td></tr>
+  <tr><td>6</td><td>Belum divalidasi klinis</td><td>Ini prototipe. Hasil pengukuran belum bisa dipakai untuk keputusan medis.</td></tr>
+</table>
+
+<h2>3. Pertanyaan untuk rumah sakit</h2>
+
+<h3>A. Cakupan dan batasan penggunaan</h3>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:56%">Pertanyaan</th><th>Jawaban</th></tr>
+  <tr><td>1</td><td>Alat ini ditujukan untuk dewasa saja, atau boleh dipakai pada anak? Berapa batas usia dan berat yang disarankan?</td><td class="blank"></td></tr>
+  <tr><td>2</td><td>Kondisi apa yang <b>tidak boleh</b> ditangani alat ini? Misalnya pengguna dengan alat pacu jantung, luka terbuka di dada, atau ibu hamil.</td><td class="blank"></td></tr>
+  <tr><td>3</td><td>Apakah alat boleh dipakai pada orang yang tidak sadar atau tidak responsif?</td><td class="blank"></td></tr>
+</table>
+
+<h3>B. Isi instruksi</h3>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:56%">Pertanyaan</th><th>Jawaban</th></tr>
+  <tr><td>4</td><td>Untuk setiap kondisi tidak normal, apa <b>kalimat pertama</b> yang harus diucapkan alat? Mohon ditulis apa adanya, siap direkam.</td><td class="blank"></td></tr>
+  <tr><td>5</td><td>Apakah instruksi boleh menyebut angka hasil pengukuran, atau cukup menyebut "hasil tidak normal"?</td><td class="blank"></td></tr>
+  <tr><td>6</td><td>Apakah perlu langkah lanjutan (misalnya longgarkan pakaian, posisikan duduk, jangan diberi makan)? Berapa langkah maksimal yang masih wajar didengar?</td><td class="blank"></td></tr>
+  <tr><td>7</td><td>Apakah perlu menyebut nomor darurat? Nomor apa yang berlaku di wilayah ini?</td><td class="blank"></td></tr>
+</table>
+
+<h3>C. Format penyampaian</h3>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:56%">Pertanyaan</th><th>Jawaban</th></tr>
+  <tr><td>8</td><td>Berapa lama maksimal satu instruksi audio? Usulan kami sekitar 10 detik per kalimat.</td><td class="blank"></td></tr>
+  <tr><td>9</td><td>Apakah instruksi perlu diulang, dan berapa interval yang wajar?</td><td class="blank"></td></tr>
+  <tr><td>10</td><td>Apakah perlu kalimat pembuka saat alat dinyalakan, misalnya penegasan bahwa ini bukan alat diagnosis?</td><td class="blank"></td></tr>
+</table>
+
+<h3>D. Persetujuan dan tanggung jawab</h3>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:56%">Pertanyaan</th><th>Jawaban</th></tr>
+  <tr><td>11</td><td>Siapa yang berwenang menyetujui isi panduan di rumah sakit? Mohon nama dan jabatan.</td><td class="blank"></td></tr>
+  <tr><td>12</td><td>Apakah rumah sakit bersedia memberi rujukan tertulis (nama buku pedoman atau guideline) untuk dikutip di paper?</td><td class="blank"></td></tr>
+  <tr><td>13</td><td>Apakah rumah sakit bersedia dicantumkan sebagai peninjau isi panduan? Bagaimana format persetujuannya?</td><td class="blank"></td></tr>
+</table>
+
+<h2>4. Tabel isian per kondisi</h2>
+
+<p>Mohon diisi oleh tenaga kesehatan. Satu baris satu kalimat, maksimal sekitar 10 detik bila diucapkan.</p>
+
+<table>
+  <tr><th style="width:22%">Kondisi alat</th><th style="width:46%">Kalimat yang disetujui</th><th style="width:16%">Diulang tiap</th><th>Rujukan</th></tr>
+  <tr><td>Detak jantung sangat lambat</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Detak jantung sangat cepat</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Kadar oksigen rendah</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Suhu tubuh sangat tinggi</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Suhu tubuh sangat rendah</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Elektroda terlepas</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+  <tr><td>Node tidak terhubung</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+</table>
+
+<p>Kalau rumah sakit ingin menetapkan ambang sendiri, mohon ditulis pada kolom rujukan atau di lembar
+tambahan. Usulan kami saat ini: HR di bawah 50 atau di atas 120, SpO2 di bawah 90, suhu di atas 39,5 atau
+di bawah 35,0 derajat.</p>
+
+<h2>5. Keputusan yang masih terbuka</h2>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:40%">Hal</th><th>Yang perlu diputuskan</th></tr>
+  <tr><td>1</td><td>Alokasi sensor per node</td><td>Setujui usulan: Node 1 AD8232, Node 2 MAX30102, Node 3 DS18B20</td></tr>
+  <tr><td>2</td><td>Sumber daya empat unit</td><td>Kabel, power bank, atau baterai 18650 terpisah?</td></tr>
+  <tr><td>3</td><td>Ambang batas final</td><td>Pakai usulan kami, atau angka dari rumah sakit</td></tr>
+  <tr><td>4</td><td>Subjek uji</td><td>Dewasa sehat, atau ada skenario pasien</td></tr>
+  <tr><td>5</td><td>Bahasa audio</td><td>Indonesia baku, atau ada istilah daerah</td></tr>
+  <tr><td>6</td><td>Lama pemakaian per sesi</td><td>Menentukan kapasitas daya dan pengujian</td></tr>
+</table>
+
+<h2>6. Yang perlu dicarikan atau disiapkan</h2>
+
+<table>
+  <tr><th style="width:6%">No</th><th style="width:52%">Item</th><th style="width:12%">Perlu?</th><th>Catatan</th></tr>
+  <tr><td>1</td><td>Surat pengantar atau izin dari institusi untuk konsultasi ke rumah sakit</td><td>□</td><td>Mempercepat proses</td></tr>
+  <tr><td>2</td><td>Nama dan kontak PIC rumah sakit</td><td>□</td><td>Dokter atau perawat yang meninjau</td></tr>
+  <tr><td>3</td><td>Buku pedoman atau guideline yang dipakai rumah sakit</td><td>□</td><td>Untuk sitasi di paper</td></tr>
+  <tr><td>4</td><td>Surat persetujuan peninjau isi panduan</td><td>□</td><td>Ditandatangani, untuk lampiran paper</td></tr>
+  <tr><td>5</td><td>Baterai atau power bank, empat unit</td><td>□</td><td>Invoice tidak termasuk baterai</td></tr>
+  <tr><td>6</td><td>Kabel elektroda cadangan, tiga set</td><td>□</td><td>Kabel elektroda mudah rusak</td></tr>
+  <tr><td>7</td><td>Kartu microSD 8 GB dan speaker</td><td>□</td><td>Sudah termasuk invoice, perlu dikonfirmasi</td></tr>
+  <tr><td>8</td><td>Tempat dan jadwal pengujian</td><td>□</td><td>Butuh ruangan tenang untuk pengukuran</td></tr>
+  <tr><td>9</td><td>Narahubung untuk merekam suara</td><td>□</td><td>Siapa yang menjadi pengisi suara</td></tr>
+  <tr><td>10</td><td>Kesediaan menjadi subjek uji</td><td>□</td><td>Minimal tiga orang dewasa</td></tr>
+</table>
+
+<h2>7. Tiga saran dari kami</h2>
+
+<p><b>Satu — audio saja tidak cukup untuk panduan first aid.</b> Rekaman sepuluh detik tidak akan cukup
+untuk menjelaskan langkah pertolongan. Saran kami: tambahkan kartu cetak ukuran A6 yang ditempel di tutup
+box, berisi ringkasan langkah. Alat cukup mengucapkan "hasil tidak normal, lihat kartu di tutup alat".
+Kartu itu juga lebih mudah disetujui rumah sakit daripada rekaman suara.</p>
+
+<p><b>Dua — jangan meminta instruksi CPR untuk audio.</b> Alat tidak bisa membedakan henti jantung dari
+elektroda yang lepas. Instruksi CPR yang dipicu oleh kesalahan pembacaan lebih berbahaya daripada tidak ada
+instruksi sama sekali. Kalau rumah sakit menyarankan CPR, arahkan ke kartu cetak, bukan ke suara.</p>
+
+<p><b>Tiga — minta rumah sakit menetapkan ambangnya.</b> Kalau kami yang menetapkan, paper akan kesulitan
+menjawab pertanyaan penguji: atas dasar apa angka itu dipilih. Kalau rumah sakit menetapkan, cukup satu
+kalimat di paper dan seluruh pertanyaan itu tertutup.</p>
+
+<h2>8. Format persetujuan yang kami butuhkan</h2>
+
+<div class="box">
+  <p><b>PENINJAUAN ISI PANDUAN FIRST AID</b></p>
+  <p>Yang bertanda tangan di bawah ini menyatakan telah meninjau isi panduan first aid pada Sistem
+  Monitoring Parameter Fisiologis Berbasis ESP32, meliputi kalimat audio dan ambang batas sebagaimana
+  terlampir.</p>
+  <p>Nama: .....................................................</p>
+  <p>Jabatan: ..................................................</p>
+  <p>Institusi: ................................................</p>
+  <p>Tanggal: ...................................................</p>
+  <p>Tanda tangan: ..............................................</p>
+</div>
+
+<p>Kalau rumah sakit punya format sendiri, pakai format mereka — yang penting ada nama, jabatan, tanggal,
+dan tanda tangan. Dokumen itu yang nanti dilampirkan di paper sebagai bukti peninjauan.</p>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+# ============================================================
+# .gitignore — Sistem Monitoring Fisiologis ESP32
+# PlatformIO + Arduino ESP32
+# ============================================================
+
+# ---------- PlatformIO ----------
+.pio/
+.pioenvs/
+.piolibdeps/
+.piopmcache/
+
+# Build output
+build/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+
+# ---------- Editor / IDE ----------
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Firmware binary ----------
+*.bin
+*.elf
+*.hex
+*.map
+
+# ---------- Lock / temp ----------
+*.lock
+*.tmp
+*.log
+
+# ---------- Secrets / credentials ----------
+credentials.h
+secrets.h
+.env
